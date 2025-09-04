@@ -113,6 +113,52 @@ export const Organizations: React.FC = () => {
     return colors[role as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
 
+  const handleEditOrganization = () => {
+    // TODO: 实现编辑组织功能
+    console.log('编辑组织');
+    alert('编辑组织成功！');
+  };
+
+  const handleInviteMember = () => {
+    // TODO: 实现邀请成员功能
+    console.log('邀请成员');
+    alert('邀请成员成功！');
+  };
+
+  const handleEditMember = (memberId: string) => {
+    // TODO: 实现编辑成员功能
+    console.log('编辑成员:', memberId);
+    alert('编辑成员成功！');
+  };
+
+  const handleRemoveMember = async (memberId: string) => {
+    if (window.confirm('确定要移除这个成员吗？')) {
+      try {
+        // TODO: 实际API调用
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // 从列表中移除成员
+        setMembers(members.filter(member => member.id !== memberId));
+        console.log('移除成员:', memberId);
+      } catch (error) {
+        console.error('移除成员失败:', error);
+        alert('移除失败，请重试');
+      }
+    }
+  };
+
+  const handleSaveSettings = () => {
+    // TODO: 实现保存设置功能
+    console.log('保存设置');
+    alert('设置保存成功！');
+  };
+
+  const handleCancelSettings = () => {
+    // TODO: 实现取消设置功能
+    console.log('取消设置');
+    // 可以重置表单数据到原始状态
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -174,7 +220,10 @@ export const Organizations: React.FC = () => {
                   </p>
                 </div>
               </div>
-              <button className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+              <button 
+                onClick={() => handleEditOrganization()}
+                className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+              >
                 编辑组织
               </button>
             </div>
@@ -238,7 +287,10 @@ export const Organizations: React.FC = () => {
         <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
             <h2 className="text-lg font-medium text-gray-900">组织成员</h2>
-            <button className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+            <button 
+              onClick={() => handleInviteMember()}
+              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+            >
               邀请成员
             </button>
           </div>
@@ -287,10 +339,16 @@ export const Organizations: React.FC = () => {
                       {new Date(member.joinedAt).toLocaleDateString('zh-CN')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button className="text-green-600 hover:text-green-900 mr-3">
+                      <button 
+                        onClick={() => handleEditMember(member.id)}
+                        className="text-green-600 hover:text-green-900 mr-3"
+                      >
                         编辑
                       </button>
-                      <button className="text-red-600 hover:text-red-900">
+                      <button 
+                        onClick={() => handleRemoveMember(member.id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
                         移除
                       </button>
                     </td>
@@ -341,10 +399,16 @@ export const Organizations: React.FC = () => {
               />
             </div>
             <div className="pt-4 border-t border-gray-200">
-              <button className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 mr-3">
+              <button 
+                onClick={() => handleSaveSettings()}
+                className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 mr-3"
+              >
                 保存设置
               </button>
-              <button className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400">
+              <button 
+                onClick={() => handleCancelSettings()}
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400"
+              >
                 取消
               </button>
             </div>

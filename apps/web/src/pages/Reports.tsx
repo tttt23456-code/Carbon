@@ -105,6 +105,27 @@ export const Reports: React.FC = () => {
   const exportReport = () => {
     // TODO: 实现报表导出功能
     console.log('导出报表');
+    
+    // 模拟导出功能
+    const csvData = [
+      '时间,总排放量(tCO₂e),Scope 1,Scope 2,Scope 3',
+      `${selectedYear}年,${reportData?.totalEmissions || 0},${reportData?.scope1 || 0},${reportData?.scope2 || 0},${reportData?.scope3 || 0}`,
+      ...reportData?.monthlyTrend.map(item => 
+        `${item.month},${item.emissions},,,`
+      ) || []
+    ].join('\n');
+    
+    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `碳排放报表_${selectedYear}年.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    alert('报表导出成功！');
   };
 
   if (loading) {

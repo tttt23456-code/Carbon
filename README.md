@@ -41,15 +41,15 @@ git clone https://github.com/carbon-calculator/carbon.git
 cd carbon
 
 # 2. 安装依赖
-pnpm install
+npm install
 
 # 3. 启动后端 API
 cd apps/api
-pnpm dev
+npm dev
 
 # 4. 启动前端 Web (新终端)
 cd apps/web  
-pnpm dev
+npm dev
 ```
 
 > 🎉 **重大改进**: 现在使用 SQLite 数据库，无需 Docker！系统启动更加简单快速。

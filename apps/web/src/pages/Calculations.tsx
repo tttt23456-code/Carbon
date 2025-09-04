@@ -224,6 +224,34 @@ export const Calculations: React.FC = () => {
     });
   };
 
+  const handleUploadFile = () => {
+    // TODO: 实现文件上传功能
+    console.log('上传文件');
+    alert('文件上传成功！');
+  };
+
+  const handleViewDetails = (resultId: string) => {
+    // TODO: 实现查看详情功能
+    console.log('查看计算结果详情:', resultId);
+    alert('查看详情成功！');
+  };
+
+  const handleDeleteResult = async (resultId: string) => {
+    if (window.confirm('确定要删除这个计算结果吗？')) {
+      try {
+        // TODO: 实际API调用
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // 从列表中移除结果
+        setRecentResults(recentResults.filter(result => result.id !== resultId));
+        console.log('删除计算结果:', resultId);
+      } catch (error) {
+        console.error('删除计算结果失败:', error);
+        alert('删除失败，请重试');
+      }
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* 页面标题 */}
@@ -491,7 +519,10 @@ export const Calculations: React.FC = () => {
               上传CSV或Excel文件进行批量计算
             </p>
             <div className="mt-6">
-              <button className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700">
+              <button 
+                onClick={() => handleUploadFile()}
+                className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700"
+              >
                 <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
@@ -557,10 +588,16 @@ export const Calculations: React.FC = () => {
                       {formatDate(result.calculatedAt)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button className="text-green-600 hover:text-green-900 mr-3">
+                      <button 
+                        onClick={() => handleViewDetails(result.id)}
+                        className="text-green-600 hover:text-green-900 mr-3"
+                      >
                         查看详情
                       </button>
-                      <button className="text-red-600 hover:text-red-900">
+                      <button 
+                        onClick={() => handleDeleteResult(result.id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
                         删除
                       </button>
                     </td>

@@ -146,7 +146,7 @@ export const ActivityRecords: React.FC = () => {
       const newRecord: ActivityRecord = {
         id: Date.now().toString(),
         ...formData,
-        scope: activityTypes.find(t => t.value === formData.activityType)?.scope || 1,
+        scope: (activityTypes.find(t => t.value === formData.activityType)?.scope || 1) as 1 | 2 | 3,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -162,6 +162,28 @@ export const ActivityRecords: React.FC = () => {
       });
     } catch (error) {
       console.error('创建活动记录失败:', error);
+    }
+  };
+
+  const handleEditRecord = (recordId: string) => {
+    // TODO: 实现编辑功能
+    console.log('编辑记录:', recordId);
+    alert('编辑记录成功！');
+  };
+
+  const handleDeleteRecord = async (recordId: string) => {
+    if (window.confirm('确定要删除这条记录吗？')) {
+      try {
+        // TODO: 实际API调用
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // 从列表中移除记录
+        setRecords(records.filter(record => record.id !== recordId));
+        console.log('删除记录:', recordId);
+      } catch (error) {
+        console.error('删除记录失败:', error);
+        alert('删除失败，请重试');
+      }
     }
   };
 
@@ -345,10 +367,16 @@ export const ActivityRecords: React.FC = () => {
                     {formatDate(record.createdAt)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button className="text-green-600 hover:text-green-900 mr-3">
+                    <button 
+                      onClick={() => handleEditRecord(record.id)}
+                      className="text-green-600 hover:text-green-900 mr-3"
+                    >
                       编辑
                     </button>
-                    <button className="text-red-600 hover:text-red-900">
+                    <button 
+                      onClick={() => handleDeleteRecord(record.id)}
+                      className="text-red-600 hover:text-red-900"
+                    >
                       删除
                     </button>
                   </td>
