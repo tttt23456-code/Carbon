@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carbon 碳排放管理平台 - 企业信息修改演示</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex flex-col">
+        <!-- 头部 -->
+        <header class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-6">
+                    <div class="flex items-center">
+                        <h1 class="text-2xl font-bold text-gray-900">Carbon 碳排放管理平台</h1>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        企业信息修改演示
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- 修改前后对比 -->
+            <div class="bg-white rounded-lg shadow p-6 mb-8">
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">📋 企业信息修改对比</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- 修改前 -->
+                    <div class="border-l-4 border-red-400 pl-4">
+                        <h3 class="text-lg font-medium text-red-600 mb-4">修改前</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <span class="font-medium text-gray-700">企业名称：</span>
+                                <span class="text-gray-600">中汽碳（北京）数字技术中心有限公司</span>
+                            </div>
+                            <div>
+                                <span class="font-medium text-gray-700">企业描述：</span>
+                                <span class="text-gray-600">致力于可持续发展的科技公司</span>
+                            </div>
+                            <div>
+                                <span class="font-medium text-gray-700">邮箱后缀：</span>
+                                <span class="text-gray-600">@caict-carbon.com</span>
+                            </div>
+                            <div>
+                                <span class="font-medium text-gray-700">演示账号：</span>
+                                <div class="text-gray-600 text-sm mt-1">
+                                    admin@caict-carbon.com<br>
+                                    manager@caict-carbon.com<br>
+                                    member@caict-carbon.com
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 修改后 -->
+                    <div class="border-l-4 border-green-400 pl-4">
+                        <h3 class="text-lg font-medium text-green-600 mb-4">修改后</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <span class="font-medium text-gray-700">企业名称：</span>
+                                <span class="text-green-600 font-medium">中汽碳（北京）数字技术中心有限公司</span>
+                            </div>
+                            <div>
+                                <span class="font-medium text-gray-700">企业描述：</span>
+                                <span class="text-green-600 font-medium">专注于汽车行业碳排放管理的数字技术中心</span>
+                            </div>
+                            <div>
+                                <span class="font-medium text-gray-700">邮箱后缀：</span>
+                                <span class="text-green-600 font-medium">@caict-carbon.com</span>
+                            </div>
+                            <div>
+                                <span class="font-medium text-gray-700">演示账号：</span>
+                                <div class="text-green-600 font-medium text-sm mt-1">
+                                    admin@caict-carbon.com<br>
+                                    manager@caict-carbon.com<br>
+                                    member@caict-carbon.com
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 修改的文件列表 -->
+            <div class="bg-white rounded-lg shadow p-6 mb-8">
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">📁 已修改的文件</h2>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="font-medium text-gray-900 mb-3">后端文件</h3>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center">
+                                <span class="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
+                                <code class="text-gray-600">apps/api/prisma/seed.ts</code>
+                            </li>
+                            <li class="flex items-center">
+                                <span class="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
+                                <code class="text-gray-600">apps/api/src/organizations/dto/organization.dto.ts</code>
+                            </li>
+                            <li class="flex items-center">
+                                <span class="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
+                                <code class="text-gray-600">apps/api/src/auth/dto/auth.dto.ts</code>
+                            </li>
+                            <li class="flex items-center">
+                                <span class="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
+                                <code class="text-gray-600">apps/api/test/*.spec.ts</code>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-medium text-gray-900 mb-3">前端文件</h3>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-center">
+                                <span class="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
+                                <code class="text-gray-600">apps/web/src/pages/Organizations.tsx</code>
+                            </li>
+                            <li class="flex items-center">
+                                <span class="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
+                                <code class="text-gray-600">apps/web/src/services/auth.ts</code>
+                            </li>
+                            <li class="flex items-center">
+                                <span class="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
+                                <code class="text-gray-600">apps/web/src/components/__tests__/*.test.tsx</code>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <h3 class="font-medium text-gray-900 mb-3">文档文件</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-center">
+                            <span class="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
+                            <code class="text-gray-600">README.md</code>
+                        </li>
+                        <li class="flex items-center">
+                            <span class="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
+                            <code class="text-gray-600">CONTRIBUTING.md</code>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 模拟登录界面 -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">🎨 登录界面预览（模拟效果）</h2>
+                
+                <div class="max-w-md mx-auto bg-gray-50 rounded-lg p-6 border">
+                    <div class="text-center mb-6">
+                        <h3 class="text-2xl font-bold text-gray-900">登录到您的账户</h3>
+                        <p class="text-gray-600 mt-2">中汽碳（北京）数字技术中心有限公司</p>
+                    </div>
+                    
+                    <form class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">邮箱地址</label>
+                            <input type="email" class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                   placeholder="your-email@caict-carbon.com" disabled>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+                            <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                                   placeholder="请输入密码" disabled>
+                        </div>
+                        
+                        <button type="button" class="w-full bg-green-600 text-white py-2 px-4 rounded-md font-medium" disabled>
+                            登录
+                        </button>
+                    </form>
+                    
+                    <div class="mt-6 pt-4 border-t border-gray-200">
+                        <p class="text-sm text-gray-600 text-center mb-3">演示账号</p>
+                        <div class="space-y-2">
+                            <button class="w-full text-left px-3 py-2 text-sm bg-blue-50 rounded text-blue-700" disabled>
+                                管理员账号 (admin@caict-carbon.com)
+                            </button>
+                            <button class="w-full text-left px-3 py-2 text-sm bg-yellow-50 rounded text-yellow-700" disabled>
+                                经理账号 (manager@caict-carbon.com)
+                            </button>
+                            <button class="w-full text-left px-3 py-2 text-sm bg-green-50 rounded text-green-700" disabled>
+                                成员账号 (member@caict-carbon.com)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 页脚 -->
+        <footer class="bg-white border-t border-gray-200 py-6">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center text-sm text-gray-600">
+                    <p>✅ 企业信息修改完成 - 中汽碳（北京）数字技术中心有限公司</p>
+                    <p class="mt-1">支持邮箱: support@caict-carbon.com</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

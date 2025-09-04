@@ -31,7 +31,7 @@ describe('Dashboard Component', () => {
     mockUseAuthStore.mockReturnValue({
       user: {
         id: '1',
-        email: 'test@example.com',
+        email: 'test@caict-carbon.com',
         name: '测试用户',
         locale: 'zh-CN',
         timezone: 'Asia/Shanghai',

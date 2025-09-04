@@ -23,7 +23,7 @@ describe('CalculationsController (e2e)', () => {
 
     // 创建测试用户并获取token
     const loginResult = await authService.login({
-      email: 'test@example.com',
+      email: 'test@caict-carbon.com',
       password: 'password123',
     });
     accessToken = loginResult.accessToken;

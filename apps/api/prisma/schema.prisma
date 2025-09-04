@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 // =================== 多租户与用户管理 ===================
@@ -20,7 +20,7 @@ model Organization {
   country     String?
   region      String?
   timezone    String   @default("UTC")
-  settings    Json     @default("{}")
+  settings    String   @default("{}")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   deletedAt   DateTime?
@@ -60,18 +60,18 @@ model User {
   @@map("users")
 }
 
-enum Role {
-  ADMIN    // 系统管理员
-  MANAGER  // 组织管理员
-  MEMBER   // 普通成员
-  READONLY // 只读用户
-}
+// enum Role {
+//   ADMIN    // 系统管理员
+//   MANAGER  // 组织管理员
+//   MEMBER   // 普通成员
+//   READONLY // 只读用户
+// }
 
 model Membership {
   id             String   @id @default(cuid())
   organizationId String
   userId         String
-  role           Role
+  role           String
   invitedBy      String?
   joinedAt       DateTime @default(now())
   createdAt      DateTime @default(now())
@@ -87,28 +87,28 @@ model Membership {
 
 // =================== 资源与项目管理 ===================
 
-enum FacilityType {
-  OFFICE         // 办公楼
-  FACTORY        // 工厂
-  WAREHOUSE      // 仓库
-  DATA_CENTER    // 数据中心
-  RETAIL_STORE   // 零售店
-  OTHER          // 其他
-}
+// enum FacilityType {
+//   OFFICE         // 办公楼
+//   FACTORY        // 工厂
+//   WAREHOUSE      // 仓库
+//   DATA_CENTER    // 数据中心
+//   RETAIL_STORE   // 零售店
+//   OTHER          // 其他
+// }
 
 model Facility {
   id             String       @id @default(cuid())
   organizationId String
   name           String
-  type           FacilityType
+  type           String
   description    String?
   address        String?
   country        String
   region         String?
-  coordinates    Json?        // { lat: number, lng: number }
+  coordinates    String?      // { lat: number, lng: number }
   area           Float?       // 面积 (平方米)
   capacity       Int?         // 容量（人数或其他单位）
-  metadata       Json         @default("{}")
+  metadata       String       @default("{}")
   isActive       Boolean      @default(true)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
@@ -131,7 +131,7 @@ model Project {
   status         String    @default("active") // active, completed, cancelled
   budget         Float?
   manager        String?   // 项目负责人
-  metadata       Json      @default("{}")
+  metadata       String    @default("{}")
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   deletedAt      DateTime?
@@ -145,31 +145,31 @@ model Project {
 
 // =================== 数据源管理 ===================
 
-enum DataSourceType {
-  MANUAL    // 手工录入
-  CSV       // CSV文件导入
-  EXCEL     // Excel文件导入
-  API       // API接口
-  DATABASE  // 数据库连接
-}
+// enum DataSourceType {
+//   MANUAL    // 手工录入
+//   CSV       // CSV文件导入
+//   EXCEL     // Excel文件导入
+//   API       // API接口
+//   DATABASE  // 数据库连接
+// }
 
-enum DataSourceStatus {
-  ACTIVE    // 活跃
-  INACTIVE  // 非活跃
-  ERROR     // 错误
-}
+// enum DataSourceStatus {
+//   ACTIVE    // 活跃
+//   INACTIVE  // 非活跃
+//   ERROR     // 错误
+// }
 
 model DataSource {
   id             String           @id @default(cuid())
   organizationId String
-  type           DataSourceType
+  type           String
   name           String
   description    String?
-  config         Json             @default("{}") // 配置信息（连接参数、映射规则等）
-  status         DataSourceStatus @default(ACTIVE)
+  config         String           @default("{}") // 配置信息（连接参数、映射规则等）
+  status         String           @default("ACTIVE")
   lastSyncAt     DateTime?
   syncFrequency  String?          // cron表达式或频率描述
-  metadata       Json             @default("{}")
+  metadata       String           @default("{}")
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   deletedAt      DateTime?
@@ -183,42 +183,42 @@ model DataSource {
 
 // =================== 活动数据与排放记录 ===================
 
-enum Scope {
-  SCOPE_1 // 直接排放
-  SCOPE_2 // 间接排放（电力）
-  SCOPE_3 // 其他间接排放
-}
+// enum Scope {
+//   SCOPE_1 // 直接排放
+//   SCOPE_2 // 间接排放（电力）
+//   SCOPE_3 // 其他间接排放
+// }
 
-enum ActivityCategory {
-  // Scope 1
-  STATIONARY_COMBUSTION     // 固定燃烧
-  MOBILE_COMBUSTION         // 移动燃烧
-  INDUSTRIAL_PROCESSES      // 工业过程
-  FUGITIVE_EMISSIONS        // 逸散排放
-  
-  // Scope 2
-  PURCHASED_ELECTRICITY     // 外购电力
-  PURCHASED_STEAM          // 外购蒸汽
-  PURCHASED_HEATING        // 外购热力
-  PURCHASED_COOLING        // 外购冷力
-  
-  // Scope 3
-  PURCHASED_GOODS          // 采购的商品和服务
-  CAPITAL_GOODS           // 资本货物
-  FUEL_ENERGY_ACTIVITIES  // 燃料和能源相关活动
-  UPSTREAM_TRANSPORT      // 上游运输和配送
-  WASTE_GENERATED         // 经营中产生的废物
-  BUSINESS_TRAVEL         // 商务旅行
-  EMPLOYEE_COMMUTING      // 员工通勤
-  UPSTREAM_LEASED_ASSETS  // 上游租赁资产
-  DOWNSTREAM_TRANSPORT    // 下游运输和配送
-  PROCESSING_SOLD_PRODUCTS // 售出产品的加工
-  USE_SOLD_PRODUCTS       // 售出产品的使用
-  END_OF_LIFE_TREATMENT   // 售出产品的报废处理
-  DOWNSTREAM_LEASED_ASSETS // 下游租赁资产
-  FRANCHISES              // 特许经营
-  INVESTMENTS             // 投资
-}
+// enum ActivityCategory {
+//   // Scope 1
+//   STATIONARY_COMBUSTION     // 固定燃烧
+//   MOBILE_COMBUSTION         // 移动燃烧
+//   INDUSTRIAL_PROCESSES      // 工业过程
+//   FUGITIVE_EMISSIONS        // 逸散排放
+//   
+//   // Scope 2
+//   PURCHASED_ELECTRICITY     // 外购电力
+//   PURCHASED_STEAM          // 外购蒸汽
+//   PURCHASED_HEATING        // 外购热力
+//   PURCHASED_COOLING        // 外购冷力
+//   
+//   // Scope 3
+//   PURCHASED_GOODS          // 采购的商品和服务
+//   CAPITAL_GOODS           // 资本货物
+//   FUEL_ENERGY_ACTIVITIES  // 燃料和能源相关活动
+//   UPSTREAM_TRANSPORT      // 上游运输和配送
+//   WASTE_GENERATED         // 经营中产生的废物
+//   BUSINESS_TRAVEL         // 商务旅行
+//   EMPLOYEE_COMMUTING      // 员工通勤
+//   UPSTREAM_LEASED_ASSETS  // 上游租赁资产
+//   DOWNSTREAM_TRANSPORT    // 下游运输和配送
+//   PROCESSING_SOLD_PRODUCTS // 售出产品的加工
+//   USE_SOLD_PRODUCTS       // 售出产品的使用
+//   END_OF_LIFE_TREATMENT   // 售出产品的报废处理
+//   DOWNSTREAM_LEASED_ASSETS // 下游租赁资产
+//   FRANCHISES              // 特许经营
+//   INVESTMENTS             // 投资
+// }
 
 model ActivityRecord {
   id             String           @id @default(cuid())
@@ -227,8 +227,8 @@ model ActivityRecord {
   facilityId     String?
   dataSourceId   String?
   
-  scope          Scope
-  category       ActivityCategory
+  scope          String
+  category       String
   activityType   String           // 具体活动类型，如 "electricity", "natural_gas", "business_flight"
   
   amount         Float            // 活动数据量
@@ -239,7 +239,7 @@ model ActivityRecord {
   
   description    String?          // 描述
   reference      String?          // 参考或票据号
-  metadata       Json             @default("{}") // 额外元数据
+  metadata       String           @default("{}") // 额外元数据
   
   // 数据质量
   dataQuality    String           @default("estimated") // measured, estimated, calculated
@@ -266,32 +266,32 @@ model ActivityRecord {
 
 // =================== 排放因子管理 ===================
 
-enum FactorSource {
-  IPCC          // IPCC指南
-  EPA           // 美国EPA
-  DEFRA         // 英国DEFRA
-  GHG_PROTOCOL  // GHG Protocol
-  IEA           // 国际能源署
-  NATIONAL      // 国家发布
-  REGIONAL      // 地区发布
-  CUSTOM        // 自定义
-}
+// enum FactorSource {
+//   IPCC          // IPCC指南
+//   EPA           // 美国EPA
+//   DEFRA         // 英国DEFRA
+//   GHG_PROTOCOL  // GHG Protocol
+//   IEA           // 国际能源署
+//   NATIONAL      // 国家发布
+//   REGIONAL      // 地区发布
+//   CUSTOM        // 自定义
+// }
 
-enum GreenhouseGas {
-  CO2   // 二氧化碳
-  CH4   // 甲烷
-  N2O   // 氧化亚氮
-  HFCS  // 氢氟碳化物
-  PFCS  // 全氟化碳
-  SF6   // 六氟化硫
-  NF3   // 三氟化氮
-}
+// enum GreenhouseGas {
+//   CO2   // 二氧化碳
+//   CH4   // 甲烷
+//   N2O   // 氧化亚氮
+//   HFCS  // 氢氟碳化物
+//   PFCS  // 全氟化碳
+//   SF6   // 六氟化硫
+//   NF3   // 三氟化氮
+// }
 
 model EmissionFactor {
   id             String        @id @default(cuid())
   organizationId String?       // null表示系统内置因子
   
-  source         FactorSource
+  source         String
   region         String        // 地区代码，如 "CN", "US", "EU", "GLOBAL"
   year           Int           // 适用年份
   
@@ -302,7 +302,7 @@ model EmissionFactor {
   factorValue    Float         // 排放因子数值
   factorUnit     String        // 排放因子单位，如 "kg CO2e/kWh"
   
-  gas            GreenhouseGas @default(CO2) // 温室气体类型
+  gas            String        @default("CO2") // 温室气体类型
   gwp            Float         @default(1)   // 全球变暖潜势 (GWP)
   
   validityStart  DateTime?     // 有效期开始
@@ -310,8 +310,8 @@ model EmissionFactor {
   
   reference      String?       // 参考来源
   methodology    String?       // 计算方法
-  assumptions    Json          @default("{}") // 假设条件
-  metadata       Json          @default("{}")
+  assumptions    String        @default("{}") // 假设条件
+  metadata       String        @default("{}")
   
   isActive       Boolean       @default(true)
   isDefault      Boolean       @default(false) // 是否为默认因子
@@ -332,12 +332,12 @@ model EmissionFactor {
 
 // =================== 计算结果 ===================
 
-enum CalculationMethod {
-  DIRECT        // 直接计算
-  AVERAGE       // 平均值法
-  INTERPOLATION // 插值法
-  EXTRAPOLATION // 外推法
-}
+// enum CalculationMethod {
+//   DIRECT        // 直接计算
+//   AVERAGE       // 平均值法
+//   INTERPOLATION // 插值法
+//   EXTRAPOLATION // 外推法
+// }
 
 model CalculationResult {
   id               String            @id @default(cuid())
@@ -345,15 +345,15 @@ model CalculationResult {
   activityRecordId String
   
   tCO2e            Float             // 计算结果（吨CO2当量）
-  breakdown        Json              // 计算明细
-  method           CalculationMethod
+  breakdown        String            // 计算明细
+  method           String
   
   factorId         String?           // 使用的排放因子ID
-  factorSnapshot   Json              // 计算时因子的快照
+  factorSnapshot   String            // 计算时因子的快照
   
   // 不确定性分析
   uncertainty      Float?            // 结果不确定性
-  sensitivityAnalysis Json?          // 敏感性分析
+  sensitivityAnalysis String?          // 敏感性分析
   
   calculatedBy     String?           // 计算人员
   calculatedAt     DateTime          @default(now())
@@ -363,7 +363,7 @@ model CalculationResult {
   verifiedAt       DateTime?
   
   notes            String?
-  metadata         Json              @default("{}")
+  metadata         String            @default("{}")
   
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
@@ -379,35 +379,35 @@ model CalculationResult {
 
 // =================== 审计日志 ===================
 
-enum AuditAction {
-  CREATE
-  UPDATE
-  DELETE
-  LOGIN
-  LOGOUT
-  IMPORT
-  EXPORT
-  CALCULATE
-  VERIFY
-}
+// enum AuditAction {
+//   CREATE
+//   UPDATE
+//   DELETE
+//   LOGIN
+//   LOGOUT
+//   IMPORT
+//   EXPORT
+//   CALCULATE
+//   VERIFY
+// }
 
 model AuditLog {
   id             String      @id @default(cuid())
   organizationId String
   actorId        String?     // 操作人员ID
   
-  action         AuditAction
+  action         String
   entity         String      // 实体类型，如 "ActivityRecord", "EmissionFactor"
   entityId       String?     // 实体ID
   
-  before         Json?       // 操作前数据
-  after          Json?       // 操作后数据
-  diff           Json?       // 变更差异
+  before         String?     // 操作前数据
+  after          String?     // 操作后数据
+  diff           String?     // 变更差异
   
   ipAddress      String?
   userAgent      String?
   
-  metadata       Json        @default("{}")
+  metadata       String      @default("{}")
   createdAt      DateTime    @default(now())
 
   // 关联关系

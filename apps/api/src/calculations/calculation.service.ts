@@ -151,7 +151,7 @@ export class CalculationService {
           amount: record.amount,
           unit: record.unit,
           metadata: {
-            ...record.metadata,
+            ...(record.metadata ? JSON.parse(record.metadata as string) : {}),
             dataQuality: record.dataQuality,
           },
         };
@@ -231,7 +231,7 @@ export class CalculationService {
       amount: record.amount,
       unit: record.unit,
       metadata: {
-        ...record.metadata,
+        ...(record.metadata ? JSON.parse(record.metadata as string) : {}),
         dataQuality: record.dataQuality,
       },
     };
@@ -300,6 +300,7 @@ export class CalculationService {
       factorUnit: factor.factorUnit,
       gas: factor.gas,
       gwp: factor.gwp,
+      source: factor.source,
       reference: factor.reference,
       methodology: factor.methodology,
       assumptions: factor.assumptions,
@@ -325,11 +326,13 @@ export class CalculationService {
         ],
         isActive: true,
         deletedAt: null,
-        OR: [
-          { validityStart: null },
-          { validityStart: { lte: new Date() } },
-        ],
         AND: [
+          {
+            OR: [
+              { validityStart: null },
+              { validityStart: { lte: new Date() } },
+            ],
+          },
           {
             OR: [
               { validityEnd: null },
@@ -362,10 +365,10 @@ export class CalculationService {
         organizationId: factor.id.split('-')[0], // 简化处理，实际应该从活动记录获取
         activityRecordId,
         tCO2e: result.tCO2e,
-        breakdown: result.breakdown,
-        method: result.method,
+        breakdown: result.breakdown as any,
+        method: result.method as any,
         factorId: factor.id,
-        factorSnapshot: factor,
+        factorSnapshot: factor as any,
         uncertainty: result.uncertainty,
       },
     });

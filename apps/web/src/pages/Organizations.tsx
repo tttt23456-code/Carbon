@@ -47,8 +47,8 @@ export const Organizations: React.FC = () => {
       const mockOrg: Organization = {
         id: currentOrganization.id,
         name: currentOrganization.name,
-        slug: currentOrganization.slug || 'demo-org',
-        description: '示例环保科技公司，专注于可持续发展和碳减排技术',
+        slug: currentOrganization.slug || 'caict-carbon',
+        description: '专注于汽车产业碳排放管理的数字技术中心',
         settings: {
           defaultCurrency: 'CNY',
           defaultTimezone: 'Asia/Shanghai',
@@ -66,21 +66,21 @@ export const Organizations: React.FC = () => {
         {
           id: '1',
           name: '张三',
-          email: 'zhangsan@example.com',
+          email: 'zhangsan@caict-carbon.com',
           role: 'ADMIN',
           joinedAt: '2024-01-01T00:00:00Z',
         },
         {
           id: '2',
           name: '李四',
-          email: 'lisi@example.com',
+          email: 'lisi@caict-carbon.com',
           role: 'MANAGER',
           joinedAt: '2024-02-15T00:00:00Z',
         },
         {
           id: '3',
           name: '王五',
-          email: 'wangwu@example.com',
+          email: 'wangwu@caict-carbon.com',
           role: 'MEMBER',
           joinedAt: '2024-03-10T00:00:00Z',
         },

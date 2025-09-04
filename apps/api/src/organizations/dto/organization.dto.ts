@@ -1,21 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsOptional, IsObject, IsEmail, IsEnum, MinLength, MaxLength } from 'class-validator';
+import { JsonValue } from '@prisma/client/runtime/library';
 
 export class CreateOrganizationDto {
-  @ApiProperty({ example: '绿色科技有限公司', description: '组织名称' })
+  @ApiProperty({ example: '中汽碳（北京）数字技术中心有限公司', description: '组织名称' })
   @IsString()
   @MinLength(2)
   @MaxLength(100)
   name: string;
 
-  @ApiProperty({ example: 'green-tech', description: '组织标识符（URL友好）' })
+  @ApiProperty({ example: 'caict-carbon', description: '组织标识符（URL友好）' })
   @IsString()
   @MinLength(2)
   @MaxLength(50)
   slug: string;
 
   @ApiProperty({ 
-    example: '致力于可持续发展的科技公司', 
+    example: '专注于汽车产业碳中和数字化转型的创新企业', 
     description: '组织描述',
     required: false 
   })
@@ -46,11 +47,11 @@ export class CreateOrganizationDto {
   })
   @IsOptional()
   @IsObject()
-  settings?: Record<string, any>;
+  settings?: JsonValue;
 }
 
 export class UpdateOrganizationDto {
-  @ApiProperty({ example: '绿色科技有限公司', description: '组织名称', required: false })
+  @ApiProperty({ example: '中汽碳（北京）数字技术中心有限公司', description: '组织名称', required: false })
   @IsOptional()
   @IsString()
   @MinLength(2)
@@ -58,7 +59,7 @@ export class UpdateOrganizationDto {
   name?: string;
 
   @ApiProperty({ 
-    example: '致力于可持续发展的科技公司', 
+    example: '专注于汽车产业碳中和数字化转型的创新企业', 
     description: '组织描述',
     required: false 
   })
@@ -89,11 +90,11 @@ export class UpdateOrganizationDto {
   })
   @IsOptional()
   @IsObject()
-  settings?: Record<string, any>;
+  settings?: JsonValue;
 }
 
 export class InviteMemberDto {
-  @ApiProperty({ example: 'user@example.com', description: '邀请用户的邮箱' })
+  @ApiProperty({ example: 'member@caict-carbon.com', description: '邀请用户的邮箱' })
   @IsEmail()
   email: string;
 
@@ -112,13 +113,13 @@ export class OrganizationResponseDto {
   @ApiProperty({ example: 'org-123', description: '组织ID' })
   id: string;
 
-  @ApiProperty({ example: '绿色科技有限公司', description: '组织名称' })
+  @ApiProperty({ example: '中汽碳（北京）数字技术中心有限公司', description: '组织名称' })
   name: string;
 
-  @ApiProperty({ example: 'green-tech', description: '组织标识符' })
+  @ApiProperty({ example: 'caict-carbon', description: '组织标识符' })
   slug: string;
 
-  @ApiProperty({ example: '致力于可持续发展的科技公司', description: '组织描述' })
+  @ApiProperty({ example: '专注于汽车产业碳中和数字化转型的创新企业', description: '组织描述' })
   description?: string;
 
   @ApiProperty({ example: 'CN', description: '国家代码' })
@@ -131,7 +132,7 @@ export class OrganizationResponseDto {
   timezone: string;
 
   @ApiProperty({ description: '组织设置' })
-  settings: Record<string, any>;
+  settings: JsonValue;
 
   @ApiProperty({ description: '创建时间' })
   createdAt: Date;

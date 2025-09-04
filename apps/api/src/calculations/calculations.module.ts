@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
 import { CalculationController } from './calculation.controller';
 import { CalculationService } from './calculation.service';
 import { CalculatorRegistry } from './calculators/calculator-registry.service';
@@ -10,6 +11,7 @@ import { FreightCalculator } from './calculators/freight.calculator';
 import { WasteCalculator } from './calculators/waste.calculator';
 
 @Module({
+  imports: [JwtModule],
   controllers: [CalculationController],
   providers: [
     // 单位转换器

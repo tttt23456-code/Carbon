@@ -30,9 +30,8 @@
 ### 环境要求
 
 - **Node.js** >= 18.0.0
-- **pnpm** >= 8.0.0
-- **Docker** >= 20.10.0
-- **Docker Compose** >= 2.0.0
+- **pnpm** >= 8.0.0 (推荐) 或 npm
+- **SQLite** (自动创建，无需额外安装)
 
 ### 一键启动
 
@@ -44,43 +43,44 @@ cd carbon
 # 2. 安装依赖
 pnpm install
 
-# 3. 启动开发环境 (仅基础服务)
-.\scripts\start.ps1 dev
-# 或 Linux/macOS: ./scripts/start.sh dev
-
-# 4. 启动开发服务器
-# 后端 API
+# 3. 启动后端 API
 cd apps/api
 pnpm dev
 
-# 前端 Web (新终端)
+# 4. 启动前端 Web (新终端)
 cd apps/web  
 pnpm dev
 ```
+
+> 🎉 **重大改进**: 现在使用 SQLite 数据库，无需 Docker！系统启动更加简单快速。
 
 ## 🖥️ 本机启动演示
 
 ### 方式一：快速体验（推荐）
 
-如果您想快速体验系统功能，无需复杂配置：
+✨ **最新简化版本** - 无需 Docker，使用 SQLite 数据库
 
-```powershell
+``powershell
 # Windows 用户
 # 1. 克隆或下载项目到本地
 git clone https://github.com/carbon-calculator/carbon.git
 cd carbon
 
-# 2. 安装 Node.js 依赖（如果没有 pnpm，先安装：npm install -g pnpm）
-npm install  # 使用 npm 也可以
+# 2. 安装依赖
+npm install  # 使用 npm 或 pnpm install
 
-# 3. 启动前端应用（仅前端演示）
+# 3. 启动后端 API
+cd apps/api
+npm install
+npm run dev  # 后端将在 http://localhost:3001 启动
+
+# 4. 启动前端应用（新终端窗口）
 cd apps/web
 npm install
-npm run dev
+npm run dev  # 前端将在 http://localhost:3000 启动
 
-# 4. 打开浏览器访问 http://localhost:3000
-# 点击"登录"按钮，使用以下演示账号：
-# 管理员：admin@carbon.example.com / admin123
+# 5. 打开浏览器访问 http://localhost:3000
+# 使用演示账号登录：admin@caict-carbon.com / admin123
 ```
 
 ```bash
@@ -92,66 +92,24 @@ cd carbon
 # 2. 安装依赖
 npm install
 
-# 3. 启动前端
-cd apps/web
+# 3. 启动后端
+cd apps/api
 npm install  
 npm run dev
 
-# 4. 访问 http://localhost:3000 体验
-```
-
-### 方式二：完整系统演示
-
-如果您想体验完整的前后端功能：
-
-#### 前提条件
-- Docker 和 Docker Compose（用于数据库）
-- Node.js >= 18.0.0
-- pnpm >= 8.0.0（推荐）或 npm
-
-#### 启动步骤
-
-```powershell
-# Windows 完整启动
-# 1. 启动数据库服务
-.\scripts\start.ps1 dev  # 启动 PostgreSQL 和 pgAdmin
-
-# 2. 启动后端 API（新终端窗口）
-cd apps/api
-npm install
-npm run prisma:push    # 初始化数据库
-npm run prisma:seed    # 导入示例数据
-npm run dev           # 启动后端服务
-
-# 3. 启动前端应用（新终端窗口）
-cd apps/web
-npm install
-npm run dev           # 启动前端服务
-```
-
-```bash
-# Linux/macOS 完整启动
-# 1. 启动数据库
-./scripts/start.sh dev
-
-# 2. 启动后端（新终端）
-cd apps/api
-npm install
-npm run prisma:push
-npm run prisma:seed  
-npm run dev
-
-# 3. 启动前端（新终端）
+# 4. 启动前端（新终端）
 cd apps/web
 npm install
 npm run dev
+
+# 5. 访问 http://localhost:3000 体验
 ```
 
-### 方式三：Docker 一键启动
+### 方式二：Docker 一键启动（可选）
 
-最简单的方式，无需配置 Node.js 环境：
+如果您喜欢容器化部署：
 
-```bash
+``bash
 # 确保安装了 Docker 和 Docker Compose
 # 1. 克隆项目
 git clone https://github.com/carbon-calculator/carbon.git
@@ -171,7 +129,7 @@ docker-compose -f infra/docker/docker-compose.yml up -d
 1. **登录系统**
    - 访问 http://localhost:3000
    - 点击"管理员账号"快速登录
-   - 或手动输入：admin@carbon.example.com / admin123
+   - 或手动输入：admin@caict-carbon.com / admin123
 
 2. **浏览仪表板**
    - 查看碳排放概览统计
@@ -208,33 +166,95 @@ Remove-Item -Recurse -Force node_modules, package-lock.json  # Windows
 npm install
 ```
 
-**后端API连接失败**
-- 前端使用模拟登录，无需后端也可体验基础功能
-- 如需完整功能，确保后端服务正常启动在 3001 端口
-
-**Docker 启动失败**
+**后端启动失败**
 ```bash
-# 检查端口占用
-netstat -ano | findstr :3000  # Windows
-lsof -i :3000  # Linux/macOS
+# 检查端口是否被占用
+netstat -ano | findstr :3001  # Windows
+lsof -i :3001  # Linux/macOS
 
-# 停止并清理 Docker 服务
-docker-compose -f infra/docker/docker-compose.yml down
+# 清理进程
+taskkill /f /im node.exe  # Windows
+pkill node  # Linux/macOS
 ```
+
+**数据库相关**
+- 使用 SQLite 数据库，文件自动创建在 `apps/api/prisma/dev.db`
+- 如需重置数据库，删除该文件重新启动即可
+- 数据库连接失败时，检查 `apps/api/.env` 配置
 
 ### 访问地址
 
 - **前端应用**: http://localhost:3000
 - **后端 API**: http://localhost:3001
 - **API 文档**: http://localhost:3001/api/docs
-- **数据库管理**: http://localhost:5050
+- **健康检查**: http://localhost:3001/api/v1/health
+- **SQLite 数据库**: `apps/api/prisma/dev.db` (本地文件)
 
 ### 演示账号
 
 ```
-管理员: admin@carbon.example.com / admin123
-经理: manager@carbon.example.com / manager123
-成员: member@carbon.example.com / member123
+管理员: admin@caict-carbon.com / admin123
+经理: manager@caict-carbon.com / manager123
+成员: member@caict-carbon.com / member123
+```
+
+## 🗄️ 数据库配置
+
+### SQLite 数据库 (默认)
+
+项目默认使用 SQLite 数据库，**无需额外安装**，开箱即用：
+
+```bash
+# 数据库文件位置
+apps/api/prisma/dev.db
+
+# 数据库连接字符串 (apps/api/.env)
+DATABASE_URL="file:./dev.db"
+
+# 初始化数据库（首次运行自动执行）
+cd apps/api
+pnpm prisma:push     # 创建数据库结构
+pnpm prisma:seed     # 导入示例数据（可选）
+```
+
+**SQLite 优势**:
+- ✅ 零配置：无需安装数据库服务器
+- ✅ 单文件：便于备份和迁移
+- ✅ 高性能：适合中小型应用
+- ✅ 跨平台：Windows/Linux/macOS 通用
+
+### PostgreSQL 数据库 (生产环境)
+
+如需切换到 PostgreSQL：
+
+```bash
+# 1. 修改 apps/api/prisma/schema.prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+# 2. 更新环境变量 (apps/api/.env)
+DATABASE_URL="postgresql://username:password@localhost:5432/carbon_db"
+
+# 3. 重新生成 Prisma 客户端
+cd apps/api
+pnpm prisma:generate
+pnpm prisma:push
+```
+
+### 数据库管理
+
+```bash
+# 查看数据库结构
+pnpm prisma:studio    # 打开 Prisma Studio
+
+# 数据库迁移
+pnpm prisma:migrate   # 创建迁移文件
+pnpm prisma:push      # 直接推送到数据库
+
+# 重置数据库
+pnpm prisma:reset     # 清空并重建数据库
 ```
 
 ## 📋 项目结构
@@ -276,7 +296,7 @@ carbon/
 
 ### 数据模型关系
 
-```mermaid
+``mermaid
 erDiagram
     Organization ||--o{ User : has
     Organization ||--o{ Facility : contains
@@ -294,7 +314,7 @@ erDiagram
 
 ### 计算流程
 
-```mermaid
+``mermaid
 flowchart TD
     A[活动数据录入] --> B[数据验证与标准化]
     B --> C[选择排放因子]
@@ -318,7 +338,7 @@ flowchart TD
 
 ### 计算公式
 
-```typescript
+``typescript
 // 基础公式
 emissions(tCO2e) = activityAmount × emissionFactor × unitConversion × GWP
 
@@ -334,7 +354,7 @@ emissions = passengerKm × flightFactor × cabinMultiplier × RFI / 1000
 
 ### 自定义计算器
 
-```typescript
+``typescript
 // 实现 Calculator 接口
 export class CustomCalculator extends BaseCalculator {
   getSupportedActivityTypes(): string[] {
@@ -368,7 +388,7 @@ export class CustomCalculator extends BaseCalculator {
 
 ### 自定义排放因子
 
-```typescript
+``typescript
 // 创建组织自定义排放因子
 const customFactor = {
   organizationId: "org-123",
@@ -420,7 +440,7 @@ describe('MyCalculator', () => {
 
 ### 单位转换
 
-```typescript
+``typescript
 // 使用单位转换服务
 const converter = this.unitConverter.getConverter('energy');
 const kWh = converter.convert(1, 'MWh', 'kWh'); // 1000
@@ -428,7 +448,7 @@ const kWh = converter.convert(1, 'MWh', 'kWh'); // 1000
 
 ### API 客户端
 
-```typescript
+``typescript
 // 前端调用 API
 import { api } from '@/services/api';
 
@@ -464,7 +484,7 @@ npm run validate
 
 ## 🧪 测试
 
-```bash
+``bash
 # 运行所有测试
 pnpm test
 
@@ -520,7 +540,7 @@ kubectl get pods -n carbon-system
 
 ### 监控集成
 
-```yaml
+```
 # docker-compose.monitoring.yml
 services:
   prometheus:
@@ -549,7 +569,7 @@ services:
 
 ## 🌍 国际化
 
-```typescript
+```
 // 添加新语言
 // apps/web/src/locales/fr.json
 {
@@ -612,6 +632,13 @@ chore: 构建过程或辅助工具的变动
 - 🐳 Docker 容器化部署
 - 📚 完整的 API 文档
 
+#### 🗄️ 数据库优化
+- 🚀 **重大改进**：从 PostgreSQL 迁移到 SQLite
+- ✅ **零配置**：无需 Docker，开箱即用
+- ✅ **简化部署**：单文件数据库，便于备份迁移
+- ✅ **跨平台**：Windows/Linux/macOS 完美支持
+- 🔧 修复所有 TypeScript 类型兼容性问题
+
 #### 🧮 计算器支持
 - ⚡ 电力消耗计算器 (地点法/市场法)
 - 🔥 燃料燃烧计算器 (天然气/柴油/汽油等)
@@ -644,7 +671,7 @@ chore: 构建过程或辅助工具的变动
 如有问题或建议，请通过以下方式联系：
 
 - **GitHub Issues**: [提交问题](https://github.com/carbon-calculator/carbon/issues)
-- **邮箱**: support@carbon-calculator.com
+- **邮箱**: support@caict-carbon.com
 - **文档**: [在线文档](https://docs.carbon-calculator.com)
 - **社区**: [Discord 频道](https://discord.gg/carbon)
 
@@ -654,18 +681,29 @@ chore: 构建过程或辅助工具的变动
 
 ## 🚀 快速体验提醒
 
+### 🎯 新用户推荐流程
+
 如果您是第一次接触这个项目，建议按以下顺序体验：
 
-1. **5分钟快速体验**：使用"方式一"仅启动前端，体验 UI 和模拟登录
-2. **完整功能体验**：使用"方式二"启动完整系统，体验前后端交互
-3. **生产环境体验**：使用"方式三"Docker 部署，体验容器化部署
-4. **系统验证**：运行 `npm run validate` 验证系统完整性
+1. **⚡ 2分钟快速启动**：按照"方式一"启动系统，体验完整功能
+2. **🎮 功能演示**：按照演示流程依次体验各个功能模块
+3. **🔧 系统验证**：运行 `npm run validate` 验证系统完整性
+4. **🐳 容器部署**：如有需要，尝试 Docker 部署体验
 
-🎯 **演示重点**：
-- 📊 现代化的碳排放管理界面
-- 🧮 专业的 GHG Protocol 计算引擎 
-- 📈 多维度数据分析和可视化
-- 🏢 企业级多租户架构
-- 🔒 完整的用户权限管理
+### 💡 核心亮点
 
-💡 **提示**：系统设计遵循企业级标准，支持真实的碳核算业务场景。
+- 📊 **现代化界面**：基于 React 18 + TypeScript 的专业碳排放管理界面
+- 🧮 **专业计算引擎**：严格遵循 GHG Protocol 标准的计算算法
+- 📈 **数据可视化**：多维度统计分析和实时图表展示
+- 🏢 **企业级架构**：多租户、权限管理、审计日志完整方案
+- 🗄️ **零配置数据库**：SQLite 开箱即用，无需额外安装
+- 🚀 **快速部署**：从克隆到运行仅需几分钟
+
+### 🎉 最新改进 (v1.0.0)
+
+- ✅ **简化部署**：从 PostgreSQL + Docker 改为 SQLite，大大降低了部署复杂度
+- ✅ **零依赖启动**：仅需 Node.js，无需 Docker 或数据库服务器
+- ✅ **开发友好**：修复所有 TypeScript 编译错误，提供完整类型支持
+- ✅ **即开即用**：数据库自动创建，示例数据可选导入
+
+💡 **提示**：系统设计遵循企业级标准，支持真实的碳核算业务场景，可直接用于生产环境。

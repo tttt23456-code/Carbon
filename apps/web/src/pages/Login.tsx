@@ -165,30 +165,30 @@ export const Login: React.FC = () => {
               <div className="text-sm text-gray-600 space-y-2">
                 <button
                   type="button"
-                  onClick={() => handleQuickLogin('admin@carbon.example.com', 'admin123')}
+                  onClick={() => handleQuickLogin('admin@caict-carbon.com', 'admin123')}
                   className="w-full bg-white p-3 rounded border hover:bg-gray-50 text-left transition-colors"
                   disabled={loginMutation.isPending}
                 >
                   <div className="font-medium">管理员账号</div>
-                  <div className="text-xs">admin@carbon.example.com / admin123</div>
+                  <div className="text-xs">admin@caict-carbon.com / admin123</div>
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleQuickLogin('manager@carbon.example.com', 'manager123')}
+                  onClick={() => handleQuickLogin('manager@caict-carbon.com', 'manager123')}
                   className="w-full bg-white p-3 rounded border hover:bg-gray-50 text-left transition-colors"
                   disabled={loginMutation.isPending}
                 >
                   <div className="font-medium">经理账号</div>
-                  <div className="text-xs">manager@carbon.example.com / manager123</div>
+                  <div className="text-xs">manager@caict-carbon.com / manager123</div>
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleQuickLogin('member@carbon.example.com', 'member123')}
+                  onClick={() => handleQuickLogin('member@caict-carbon.com', 'member123')}
                   className="w-full bg-white p-3 rounded border hover:bg-gray-50 text-left transition-colors"
                   disabled={loginMutation.isPending}
                 >
                   <div className="font-medium">成员账号</div>
-                  <div className="text-xs">member@carbon.example.com / member123</div>
+                  <div className="text-xs">member@caict-carbon.com / member123</div>
                 </button>
               </div>
             </div>

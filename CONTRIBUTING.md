@@ -374,7 +374,7 @@ export class ElectricityCalculator extends BaseCalculator {
 ### 安全漏洞
 
 如果发现安全漏洞，请**不要**在公开 Issue 中报告，而是发送邮件到：
-security@carbon-calculator.com
+security@caict-carbon.com
 
 ## 🏗️ 架构指南
 

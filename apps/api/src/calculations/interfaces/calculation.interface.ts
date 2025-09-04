@@ -32,6 +32,7 @@ export interface EmissionFactor {
   factorUnit: string;
   gas: string;
   gwp: number;
+  source: string;
   reference?: string;
   methodology?: string;
   assumptions?: Record<string, any>;

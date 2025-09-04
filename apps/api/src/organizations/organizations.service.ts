@@ -21,7 +21,7 @@ export class OrganizationsService {
       data: {
         ...createDto,
         timezone: createDto.timezone || 'UTC',
-        settings: createDto.settings || {},
+        settings: createDto.settings ? JSON.stringify(createDto.settings) : "{}",
       },
     });
 
@@ -92,7 +92,14 @@ export class OrganizationsService {
 
     const organization = await this.prisma.organization.update({
       where: { id },
-      data: updateDto,
+      data: {
+        ...(updateDto.name !== undefined && { name: updateDto.name }),
+        ...(updateDto.description !== undefined && { description: updateDto.description }),
+        ...(updateDto.country !== undefined && { country: updateDto.country }),
+        ...(updateDto.region !== undefined && { region: updateDto.region }),
+        ...(updateDto.timezone !== undefined && { timezone: updateDto.timezone }),
+        ...(updateDto.settings !== undefined && { settings: JSON.stringify(updateDto.settings) }),
+      },
     });
 
     return organization;

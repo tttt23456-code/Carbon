@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsString, MinLength } from 'class-validator';
 
 export class LoginDto {
-  @ApiProperty({ example: 'admin@carbon.example.com', description: '邮箱地址' })
+  @ApiProperty({ example: 'admin@caict-carbon.com', description: '邮箱地址' })
   @IsEmail({}, { message: '请输入有效的邮箱地址' })
   email: string;
 
@@ -13,7 +13,7 @@ export class LoginDto {
 }
 
 export class RegisterDto {
-  @ApiProperty({ example: 'admin@carbon.example.com', description: '邮箱地址' })
+  @ApiProperty({ example: 'admin@caict-carbon.com', description: '邮箱地址' })
   @IsEmail({}, { message: '请输入有效的邮箱地址' })
   email: string;
 

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ElectricityCalculator } from '../../calculations/calculators/electricity.calculator';
-import { UnitConverterRegistry } from '../../calculations/units/unit-converter.service';
-import { NormalizedInput, EmissionFactor, CalculationResult } from '../../calculations/interfaces/calculation.interface';
+import { ElectricityCalculator } from '../electricity.calculator';
+import { UnitConverterRegistry } from '../../units/unit-converter.service';
+import { NormalizedInput, EmissionFactor, CalculationResult } from '../../interfaces/calculation.interface';
 
 describe('ElectricityCalculator', () => {
   let calculator: ElectricityCalculator;
@@ -34,20 +34,19 @@ describe('ElectricityCalculator', () => {
       year: 2023,
       factorValue: 0.5810, // kg CO2e/kWh
       factorUnit: 'kg CO2e/kWh',
+      gas: 'CO2',
+      gwp: 1,
       source: 'CHINA_GRID',
       reference: '中国电网平均排放因子',
-      priority: 100,
-      createdAt: new Date(),
-      updatedAt: new Date(),
     };
 
     it('should calculate location-based emissions correctly', async () => {
       const input: NormalizedInput = {
         activityType: 'electricity',
+        amount: 1000,
+        unit: 'kWh',
         normalizedAmount: 1000, // kWh
         normalizedUnit: 'kWh',
-        originalAmount: 1000,
-        originalUnit: 'kWh',
         metadata: {
           method: 'location_based',
           region: 'CN',
@@ -64,10 +63,10 @@ describe('ElectricityCalculator', () => {
     it('should calculate market-based emissions correctly', async () => {
       const input: NormalizedInput = {
         activityType: 'electricity',
+        amount: 1000,
+        unit: 'kWh',
         normalizedAmount: 1000, // kWh
         normalizedUnit: 'kWh',
-        originalAmount: 1000,
-        originalUnit: 'kWh',
         metadata: {
           method: 'market_based',
           region: 'CN',
@@ -83,10 +82,10 @@ describe('ElectricityCalculator', () => {
     it('should handle zero amount correctly', async () => {
       const input: NormalizedInput = {
         activityType: 'electricity',
+        amount: 0,
+        unit: 'kWh',
         normalizedAmount: 0,
         normalizedUnit: 'kWh',
-        originalAmount: 0,
-        originalUnit: 'kWh',
         metadata: {
           method: 'location_based',
         },
@@ -100,10 +99,10 @@ describe('ElectricityCalculator', () => {
     it('should default to location-based method when not specified', async () => {
       const input: NormalizedInput = {
         activityType: 'electricity',
+        amount: 1000,
+        unit: 'kWh',
         normalizedAmount: 1000,
         normalizedUnit: 'kWh',
-        originalAmount: 1000,
-        originalUnit: 'kWh',
         metadata: {},
       };
 
@@ -113,31 +112,29 @@ describe('ElectricityCalculator', () => {
     });
   });
 
-  describe('validateInput', () => {
-    it('should accept valid electricity input', () => {
-      const input: NormalizedInput = {
+  describe('validate', () => {
+    it('should accept valid electricity input', async () => {
+      const input = {
         activityType: 'electricity',
-        normalizedAmount: 1000,
-        normalizedUnit: 'kWh',
-        originalAmount: 1000,
-        originalUnit: 'kWh',
+        amount: 1000,
+        unit: 'kWh',
         metadata: {},
       };
 
-      expect(() => calculator.validateInput(input)).not.toThrow();
+      const result = await calculator.validate(input);
+      expect(result.activityType).toBe('electricity');
+      expect(result.normalizedAmount).toBe(1000);
     });
 
-    it('should reject negative amount', () => {
-      const input: NormalizedInput = {
+    it('should reject negative amount', async () => {
+      const input = {
         activityType: 'electricity',
-        normalizedAmount: -1000,
-        normalizedUnit: 'kWh',
-        originalAmount: -1000,
-        originalUnit: 'kWh',
+        amount: -1000,
+        unit: 'kWh',
         metadata: {},
       };
 
-      expect(() => calculator.validateInput(input)).toThrow();
+      await expect(calculator.validate(input)).rejects.toThrow();
     });
   });
 });

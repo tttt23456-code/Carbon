@@ -28,7 +28,7 @@ describe('AuthController (e2e)', () => {
       const response = await request(app.getHttpServer())
         .post('/auth/login')
         .send({
-          email: 'test@example.com',
+          email: 'test@caict-carbon.com',
           password: 'password123',
         })
         .expect(201);
@@ -36,14 +36,14 @@ describe('AuthController (e2e)', () => {
       expect(response.body).toHaveProperty('accessToken');
       expect(response.body).toHaveProperty('refreshToken');
       expect(response.body).toHaveProperty('user');
-      expect(response.body.user.email).toBe('test@example.com');
+      expect(response.body.user.email).toBe('test@caict-carbon.com');
     });
 
     it('should fail with invalid credentials', async () => {
       await request(app.getHttpServer())
         .post('/auth/login')
         .send({
-          email: 'test@example.com',
+          email: 'test@caict-carbon.com',
           password: 'wrongpassword',
         })
         .expect(401);
@@ -62,7 +62,7 @@ describe('AuthController (e2e)', () => {
   describe('/auth/register (POST)', () => {
     it('should register new user successfully', async () => {
       const userData = {
-        email: 'newuser@example.com',
+        email: 'newuser@caict-carbon.com',
         password: 'password123',
         name: '新用户',
       };
@@ -80,7 +80,7 @@ describe('AuthController (e2e)', () => {
 
     it('should fail with duplicate email', async () => {
       const userData = {
-        email: 'duplicate@example.com',
+        email: 'duplicate@caict-carbon.com',
         password: 'password123',
         name: '重复用户',
       };

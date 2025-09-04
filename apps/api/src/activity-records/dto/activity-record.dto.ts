@@ -10,6 +10,7 @@ import {
   Min,
   Max,
 } from 'class-validator';
+import { JsonValue } from '@prisma/client/runtime/library';
 
 export class CreateActivityRecordDto {
   @ApiProperty({ example: 'electricity', description: '活动类型' })
@@ -91,7 +92,7 @@ export class CreateActivityRecordDto {
   })
   @IsOptional()
   @IsObject()
-  metadata?: Record<string, any>;
+  metadata?: JsonValue;
 }
 
 export class UpdateActivityRecordDto {
@@ -159,7 +160,7 @@ export class UpdateActivityRecordDto {
   })
   @IsOptional()
   @IsObject()
-  metadata?: Record<string, any>;
+  metadata?: JsonValue;
 }
 
 export class VerifyActivityRecordDto {
@@ -291,7 +292,7 @@ export class ActivityRecordResponseDto {
   }[];
 
   @ApiProperty({ description: '元数据' })
-  metadata: Record<string, any>;
+  metadata: JsonValue;
 
   @ApiProperty({ description: '创建时间' })
   createdAt: Date;

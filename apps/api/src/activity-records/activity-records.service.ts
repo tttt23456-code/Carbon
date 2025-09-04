@@ -23,12 +23,21 @@ export class ActivityRecordsService {
 
     const activityRecord = await this.prisma.activityRecord.create({
       data: {
-        ...createDto,
-        organizationId,
+        activityType: createDto.activityType,
+        scope: createDto.scope as any,
+        category: createDto.category as any,
+        amount: createDto.amount,
+        unit: createDto.unit,
         periodStart: new Date(createDto.periodStart),
         periodEnd: new Date(createDto.periodEnd),
+        description: createDto.description,
+        reference: createDto.reference,
         dataQuality: createDto.dataQuality || 'estimated',
-        metadata: createDto.metadata || {},
+        uncertainty: createDto.uncertainty,
+        metadata: createDto.metadata ? JSON.stringify(createDto.metadata) : "{}",
+        organizationId,
+        ...(createDto.projectId && { projectId: createDto.projectId }),
+        ...(createDto.facilityId && { facilityId: createDto.facilityId }),
       },
       include: {
         project: {
@@ -189,7 +198,15 @@ export class ActivityRecordsService {
     const updatedRecord = await this.prisma.activityRecord.update({
       where: { id },
       data: {
-        ...updateDto,
+        ...(updateDto.amount !== undefined && { amount: updateDto.amount }),
+        ...(updateDto.unit !== undefined && { unit: updateDto.unit }),
+        ...(updateDto.description !== undefined && { description: updateDto.description }),
+        ...(updateDto.reference !== undefined && { reference: updateDto.reference }),
+        ...(updateDto.dataQuality !== undefined && { dataQuality: updateDto.dataQuality }),
+        ...(updateDto.uncertainty !== undefined && { uncertainty: updateDto.uncertainty }),
+        ...(updateDto.projectId !== undefined && { projectId: updateDto.projectId }),
+        ...(updateDto.facilityId !== undefined && { facilityId: updateDto.facilityId }),
+        ...(updateDto.metadata !== undefined && { metadata: JSON.stringify(updateDto.metadata) }),
         periodStart: updateDto.periodStart ? new Date(updateDto.periodStart) : undefined,
         periodEnd: updateDto.periodEnd ? new Date(updateDto.periodEnd) : undefined,
         // 如果数据被修改，重置验证状态

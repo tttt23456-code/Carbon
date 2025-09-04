@@ -25,7 +25,7 @@ async function main() {
   console.log('👤 创建示例用户...');
   const adminUser = await prisma.user.create({
     data: {
-      email: 'admin@carbon.example.com',
+      email: 'admin@caict-carbon.com',
       name: '系统管理员',
       passwordHash: await bcrypt.hash('admin123', 10),
       locale: 'zh-CN',
@@ -36,7 +36,7 @@ async function main() {
 
   const managerUser = await prisma.user.create({
     data: {
-      email: 'manager@carbon.example.com',
+      email: 'manager@caict-carbon.com',
       name: '碳管理经理',
       passwordHash: await bcrypt.hash('manager123', 10),
       locale: 'zh-CN',
@@ -47,7 +47,7 @@ async function main() {
 
   const memberUser = await prisma.user.create({
     data: {
-      email: 'member@carbon.example.com',
+      email: 'member@caict-carbon.com',
       name: '普通用户',
       passwordHash: await bcrypt.hash('member123', 10),
       locale: 'zh-CN',
@@ -60,9 +60,9 @@ async function main() {
   console.log('🏢 创建示例组织...');
   const organization = await prisma.organization.create({
     data: {
-      name: '绿色科技有限公司',
-      slug: 'green-tech',
-      description: '致力于可持续发展的科技公司',
+      name: '中汽碳（北京）数字技术中心有限公司',
+      slug: 'caict-carbon',
+      description: '专注于汽车产业碳中和数字化转型的创新企业',
       country: 'CN',
       region: 'Beijing',
       timezone: 'Asia/Shanghai',
@@ -468,8 +468,8 @@ async function main() {
   console.log('✅ 数据播种完成！');
   console.log(`
 📊 已创建的数据：
-- 👥 用户: 3个 (admin@carbon.example.com, manager@carbon.example.com, member@carbon.example.com)
-- 🏢 组织: 1个 (绿色科技有限公司)
+- 👥 用户: 3个 (admin@caict-carbon.com, manager@caict-carbon.com, member@caict-carbon.com)
+- 🏢 组织: 1个 (中汽碳（北京）数字技术中心有限公司)
 - 🏭 设施: 2个 (总部大楼, 生产工厂)
 - 📋 项目: 1个 (2024年碳中和项目)
 - 📊 数据源: 1个 (手工数据录入)
@@ -477,9 +477,9 @@ async function main() {
 - 📈 活动记录: 4个 (电力、天然气、出行、运输)
 
 🔑 登录凭据：
-- 管理员: admin@carbon.example.com / admin123
-- 经理: manager@carbon.example.com / manager123  
-- 成员: member@carbon.example.com / member123
+- 管理员: admin@caict-carbon.com / admin123
+- 经理: manager@caict-carbon.com / manager123  
+- 成员: member@caict-carbon.com / member123
 
 ⚠️  注意：这些是示例数据，排放因子仅供演示使用，实际应用中需要使用权威数据源。
   `);

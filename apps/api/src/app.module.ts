@@ -24,12 +24,10 @@ import { HealthModule } from './health/health.module';
     }),
 
     // 速率限制
-    ThrottlerModule.forRoot([
-      {
-        ttl: 60000, // 1分钟
-        limit: 100, // 100次请求
-      },
-    ]),
+    ThrottlerModule.forRoot({
+      ttl: 60000, // 1分钟
+      limit: 100, // 100次请求
+    }),
 
     // 核心模块
     PrismaModule,

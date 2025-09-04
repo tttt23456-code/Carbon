@@ -2,9 +2,9 @@ import api from './api';
 
 // 模拟用户数据
 const MOCK_USERS = {
-  'admin@carbon.example.com': {
+  'admin@caict-carbon.com': {
     id: '1',
-    email: 'admin@carbon.example.com',
+    email: 'admin@caict-carbon.com',
     name: '系统管理员',
     locale: 'zh-CN',
     timezone: 'Asia/Shanghai',
@@ -13,14 +13,14 @@ const MOCK_USERS = {
       role: 'ADMIN',
       organization: {
         id: 'org1',
-        name: '示例环保科技公司',
-        slug: 'demo-org'
+        name: '中汽碳（北京）数字技术中心有限公司',
+        slug: 'caict-carbon'
       }
     }]
   },
-  'manager@carbon.example.com': {
+  'manager@caict-carbon.com': {
     id: '2',
-    email: 'manager@carbon.example.com',
+    email: 'manager@caict-carbon.com',
     name: '项目经理',
     locale: 'zh-CN',
     timezone: 'Asia/Shanghai',
@@ -29,14 +29,14 @@ const MOCK_USERS = {
       role: 'MANAGER',
       organization: {
         id: 'org1',
-        name: '示例环保科技公司',
-        slug: 'demo-org'
+        name: '中汽碳（北京）数字技术中心有限公司',
+        slug: 'caict-carbon'
       }
     }]
   },
-  'member@carbon.example.com': {
+  'member@caict-carbon.com': {
     id: '3',
-    email: 'member@carbon.example.com',
+    email: 'member@caict-carbon.com',
     name: '团队成员',
     locale: 'zh-CN',
     timezone: 'Asia/Shanghai',
@@ -45,8 +45,8 @@ const MOCK_USERS = {
       role: 'MEMBER',
       organization: {
         id: 'org1',
-        name: '示例环保科技公司',
-        slug: 'demo-org'
+        name: '中汽碳（北京）数字技术中心有限公司',
+        slug: 'caict-carbon'
       }
     }]
   }
@@ -110,9 +110,9 @@ export const authService = {
     
     // 简单的密码验证
     const validPasswords = {
-      'admin@carbon.example.com': 'admin123',
-      'manager@carbon.example.com': 'manager123',
-      'member@carbon.example.com': 'member123'
+      'admin@caict-carbon.com': 'admin123',
+      'manager@caict-carbon.com': 'manager123',
+      'member@caict-carbon.com': 'member123'
     };
     
     if (validPasswords[data.email as keyof typeof validPasswords] !== data.password) {

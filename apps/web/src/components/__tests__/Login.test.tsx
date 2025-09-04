@@ -55,7 +55,7 @@ describe('Login Component', () => {
     mockAuthService.login.mockResolvedValue({
       user: {
         id: '1',
-        email: 'test@example.com',
+        email: 'test@caict-carbon.com',
         name: '测试用户',
         locale: 'zh-CN',
         timezone: 'Asia/Shanghai',
@@ -73,13 +73,13 @@ describe('Login Component', () => {
     const passwordInput = screen.getByPlaceholderText('密码');
     const loginButton = screen.getByRole('button', { name: '登录' });
     
-    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
+    fireEvent.change(emailInput, { target: { value: 'test@caict-carbon.com' } });
     fireEvent.change(passwordInput, { target: { value: 'password123' } });
     fireEvent.click(loginButton);
     
     await waitFor(() => {
       expect(mockAuthService.login).toHaveBeenCalledWith({
-        email: 'test@example.com',
+        email: 'test@caict-carbon.com',
         password: 'password123',
       });
     });
@@ -98,7 +98,7 @@ describe('Login Component', () => {
     mockAuthService.login.mockResolvedValue({
       user: {
         id: '1',
-        email: 'admin@carbon.example.com',
+        email: 'admin@caict-carbon.com',
         name: '系统管理员',
         locale: 'zh-CN',
         timezone: 'Asia/Shanghai',
@@ -117,7 +117,7 @@ describe('Login Component', () => {
     
     await waitFor(() => {
       expect(mockAuthService.login).toHaveBeenCalledWith({
-        email: 'admin@carbon.example.com',
+        email: 'admin@caict-carbon.com',
         password: 'admin123',
       });
     });
