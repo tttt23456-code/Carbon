@@ -1,0 +1,420 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =================== 多租户与用户管理 ===================
+
+model Organization {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  country     String?
+  region      String?
+  timezone    String   @default("UTC")
+  settings    Json     @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  // 关联关系
+  memberships      Membership[]
+  facilities       Facility[]
+  projects         Project[]
+  dataSources      DataSource[]
+  activityRecords  ActivityRecord[]
+  emissionFactors  EmissionFactor[]
+  calculationResults CalculationResult[]
+  auditLogs        AuditLog[]
+
+  @@map("organizations")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  passwordHash String
+  locale       String    @default("zh-CN")
+  timezone     String    @default("UTC")
+  avatar       String?
+  emailVerified Boolean  @default(false)
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  // 关联关系
+  memberships Membership[]
+  auditLogs   AuditLog[]
+
+  @@map("users")
+}
+
+enum Role {
+  ADMIN    // 系统管理员
+  MANAGER  // 组织管理员
+  MEMBER   // 普通成员
+  READONLY // 只读用户
+}
+
+model Membership {
+  id             String   @id @default(cuid())
+  organizationId String
+  userId         String
+  role           Role
+  invitedBy      String?
+  joinedAt       DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // 关联关系
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@map("memberships")
+}
+
+// =================== 资源与项目管理 ===================
+
+enum FacilityType {
+  OFFICE         // 办公楼
+  FACTORY        // 工厂
+  WAREHOUSE      // 仓库
+  DATA_CENTER    // 数据中心
+  RETAIL_STORE   // 零售店
+  OTHER          // 其他
+}
+
+model Facility {
+  id             String       @id @default(cuid())
+  organizationId String
+  name           String
+  type           FacilityType
+  description    String?
+  address        String?
+  country        String
+  region         String?
+  coordinates    Json?        // { lat: number, lng: number }
+  area           Float?       // 面积 (平方米)
+  capacity       Int?         // 容量（人数或其他单位）
+  metadata       Json         @default("{}")
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  deletedAt      DateTime?
+
+  // 关联关系
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  activityRecords ActivityRecord[]
+
+  @@map("facilities")
+}
+
+model Project {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  description    String?
+  startDate      DateTime
+  endDate        DateTime?
+  status         String    @default("active") // active, completed, cancelled
+  budget         Float?
+  manager        String?   // 项目负责人
+  metadata       Json      @default("{}")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  // 关联关系
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  activityRecords ActivityRecord[]
+
+  @@map("projects")
+}
+
+// =================== 数据源管理 ===================
+
+enum DataSourceType {
+  MANUAL    // 手工录入
+  CSV       // CSV文件导入
+  EXCEL     // Excel文件导入
+  API       // API接口
+  DATABASE  // 数据库连接
+}
+
+enum DataSourceStatus {
+  ACTIVE    // 活跃
+  INACTIVE  // 非活跃
+  ERROR     // 错误
+}
+
+model DataSource {
+  id             String           @id @default(cuid())
+  organizationId String
+  type           DataSourceType
+  name           String
+  description    String?
+  config         Json             @default("{}") // 配置信息（连接参数、映射规则等）
+  status         DataSourceStatus @default(ACTIVE)
+  lastSyncAt     DateTime?
+  syncFrequency  String?          // cron表达式或频率描述
+  metadata       Json             @default("{}")
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  deletedAt      DateTime?
+
+  // 关联关系
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  activityRecords ActivityRecord[]
+
+  @@map("data_sources")
+}
+
+// =================== 活动数据与排放记录 ===================
+
+enum Scope {
+  SCOPE_1 // 直接排放
+  SCOPE_2 // 间接排放（电力）
+  SCOPE_3 // 其他间接排放
+}
+
+enum ActivityCategory {
+  // Scope 1
+  STATIONARY_COMBUSTION     // 固定燃烧
+  MOBILE_COMBUSTION         // 移动燃烧
+  INDUSTRIAL_PROCESSES      // 工业过程
+  FUGITIVE_EMISSIONS        // 逸散排放
+  
+  // Scope 2
+  PURCHASED_ELECTRICITY     // 外购电力
+  PURCHASED_STEAM          // 外购蒸汽
+  PURCHASED_HEATING        // 外购热力
+  PURCHASED_COOLING        // 外购冷力
+  
+  // Scope 3
+  PURCHASED_GOODS          // 采购的商品和服务
+  CAPITAL_GOODS           // 资本货物
+  FUEL_ENERGY_ACTIVITIES  // 燃料和能源相关活动
+  UPSTREAM_TRANSPORT      // 上游运输和配送
+  WASTE_GENERATED         // 经营中产生的废物
+  BUSINESS_TRAVEL         // 商务旅行
+  EMPLOYEE_COMMUTING      // 员工通勤
+  UPSTREAM_LEASED_ASSETS  // 上游租赁资产
+  DOWNSTREAM_TRANSPORT    // 下游运输和配送
+  PROCESSING_SOLD_PRODUCTS // 售出产品的加工
+  USE_SOLD_PRODUCTS       // 售出产品的使用
+  END_OF_LIFE_TREATMENT   // 售出产品的报废处理
+  DOWNSTREAM_LEASED_ASSETS // 下游租赁资产
+  FRANCHISES              // 特许经营
+  INVESTMENTS             // 投资
+}
+
+model ActivityRecord {
+  id             String           @id @default(cuid())
+  organizationId String
+  projectId      String?
+  facilityId     String?
+  dataSourceId   String?
+  
+  scope          Scope
+  category       ActivityCategory
+  activityType   String           // 具体活动类型，如 "electricity", "natural_gas", "business_flight"
+  
+  amount         Float            // 活动数据量
+  unit           String           // 单位，如 "kWh", "L", "kg", "km"
+  
+  periodStart    DateTime         // 活动期间开始
+  periodEnd      DateTime         // 活动期间结束
+  
+  description    String?          // 描述
+  reference      String?          // 参考或票据号
+  metadata       Json             @default("{}") // 额外元数据
+  
+  // 数据质量
+  dataQuality    String           @default("estimated") // measured, estimated, calculated
+  uncertainty    Float?           // 不确定性百分比
+  
+  isVerified     Boolean          @default(false)
+  verifiedBy     String?
+  verifiedAt     DateTime?
+  
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  deletedAt      DateTime?
+
+  // 关联关系
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project      Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  facility     Facility?    @relation(fields: [facilityId], references: [id], onDelete: SetNull)
+  dataSource   DataSource?  @relation(fields: [dataSourceId], references: [id], onDelete: SetNull)
+  
+  calculationResults CalculationResult[]
+
+  @@map("activity_records")
+}
+
+// =================== 排放因子管理 ===================
+
+enum FactorSource {
+  IPCC          // IPCC指南
+  EPA           // 美国EPA
+  DEFRA         // 英国DEFRA
+  GHG_PROTOCOL  // GHG Protocol
+  IEA           // 国际能源署
+  NATIONAL      // 国家发布
+  REGIONAL      // 地区发布
+  CUSTOM        // 自定义
+}
+
+enum GreenhouseGas {
+  CO2   // 二氧化碳
+  CH4   // 甲烷
+  N2O   // 氧化亚氮
+  HFCS  // 氢氟碳化物
+  PFCS  // 全氟化碳
+  SF6   // 六氟化硫
+  NF3   // 三氟化氮
+}
+
+model EmissionFactor {
+  id             String        @id @default(cuid())
+  organizationId String?       // null表示系统内置因子
+  
+  source         FactorSource
+  region         String        // 地区代码，如 "CN", "US", "EU", "GLOBAL"
+  year           Int           // 适用年份
+  
+  activityType   String        // 对应的活动类型
+  description    String        // 描述
+  
+  unit           String        // 活动数据单位，如 "kWh", "L", "kg"
+  factorValue    Float         // 排放因子数值
+  factorUnit     String        // 排放因子单位，如 "kg CO2e/kWh"
+  
+  gas            GreenhouseGas @default(CO2) // 温室气体类型
+  gwp            Float         @default(1)   // 全球变暖潜势 (GWP)
+  
+  validityStart  DateTime?     // 有效期开始
+  validityEnd    DateTime?     // 有效期结束
+  
+  reference      String?       // 参考来源
+  methodology    String?       // 计算方法
+  assumptions    Json          @default("{}") // 假设条件
+  metadata       Json          @default("{}")
+  
+  isActive       Boolean       @default(true)
+  isDefault      Boolean       @default(false) // 是否为默认因子
+  priority       Int           @default(0)     // 优先级（数字越大优先级越高）
+  
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  deletedAt      DateTime?
+
+  // 关联关系
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  calculationResults CalculationResult[]
+
+  @@index([activityType, region, year])
+  @@index([organizationId, activityType])
+  @@map("emission_factors")
+}
+
+// =================== 计算结果 ===================
+
+enum CalculationMethod {
+  DIRECT        // 直接计算
+  AVERAGE       // 平均值法
+  INTERPOLATION // 插值法
+  EXTRAPOLATION // 外推法
+}
+
+model CalculationResult {
+  id               String            @id @default(cuid())
+  organizationId   String
+  activityRecordId String
+  
+  tCO2e            Float             // 计算结果（吨CO2当量）
+  breakdown        Json              // 计算明细
+  method           CalculationMethod
+  
+  factorId         String?           // 使用的排放因子ID
+  factorSnapshot   Json              // 计算时因子的快照
+  
+  // 不确定性分析
+  uncertainty      Float?            // 结果不确定性
+  sensitivityAnalysis Json?          // 敏感性分析
+  
+  calculatedBy     String?           // 计算人员
+  calculatedAt     DateTime          @default(now())
+  
+  isVerified       Boolean           @default(false)
+  verifiedBy       String?
+  verifiedAt       DateTime?
+  
+  notes            String?
+  metadata         Json              @default("{}")
+  
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  // 关联关系
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  activityRecord ActivityRecord @relation(fields: [activityRecordId], references: [id], onDelete: Cascade)
+  emissionFactor EmissionFactor? @relation(fields: [factorId], references: [id], onDelete: SetNull)
+
+  @@unique([activityRecordId]) // 每个活动记录只能有一个计算结果
+  @@map("calculation_results")
+}
+
+// =================== 审计日志 ===================
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  IMPORT
+  EXPORT
+  CALCULATE
+  VERIFY
+}
+
+model AuditLog {
+  id             String      @id @default(cuid())
+  organizationId String
+  actorId        String?     // 操作人员ID
+  
+  action         AuditAction
+  entity         String      // 实体类型，如 "ActivityRecord", "EmissionFactor"
+  entityId       String?     // 实体ID
+  
+  before         Json?       // 操作前数据
+  after          Json?       // 操作后数据
+  diff           Json?       // 变更差异
+  
+  ipAddress      String?
+  userAgent      String?
+  
+  metadata       Json        @default("{}")
+  createdAt      DateTime    @default(now())
+
+  // 关联关系
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  actor        User?        @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@index([entity, entityId])
+  @@map("audit_logs")
+}

@@ -1,0 +1,136 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 数据库
+  postgres:
+    image: postgres:15-alpine
+    container_name: carbon-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: carbon_db
+      POSTGRES_USER: carbon_user
+      POSTGRES_PASSWORD: carbon_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - carbon-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U carbon_user -d carbon_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis (可选，用于缓存和会话)
+  redis:
+    image: redis:7-alpine
+    container_name: carbon-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - carbon-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # 后端 API
+  api:
+    build:
+      context: ../../
+      dockerfile: infra/docker/Dockerfile.api
+    container_name: carbon-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://carbon_user:carbon_password@postgres:5432/carbon_db?schema=public
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: your-super-secret-jwt-key-change-this-in-production-min-32-chars
+      JWT_REFRESH_SECRET: your-super-secret-refresh-key-change-this-in-production-min-32-chars
+      JWT_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      PORT: 3001
+      API_PREFIX: /api/v1
+      DEFAULT_LOCALE: zh-CN
+      SUPPORTED_LOCALES: zh-CN,en-US
+      CORS_ORIGINS: http://localhost:3000,http://localhost:80
+      LOG_LEVEL: info
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - carbon-network
+    volumes:
+      - api_uploads:/app/uploads
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # 前端 Web
+  web:
+    build:
+      context: ../../
+      dockerfile: infra/docker/Dockerfile.web
+      args:
+        VITE_API_URL: http://localhost:3001/api/v1
+    container_name: carbon-web
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - carbon-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # pgAdmin (可选，数据库管理工具)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: carbon-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@carbon.local
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - carbon-network
+    profiles:
+      - tools
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+  api_uploads:
+    driver: local
+
+networks:
+  carbon-network:
+    driver: bridge

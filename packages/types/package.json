@@ -1,0 +1,19 @@
+{
+  "name": "@carbon/types",
+  "version": "1.0.0",
+  "description": "Shared TypeScript types for Carbon Emission Calculator",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf dist",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.2",
+    "rimraf": "^5.0.1"
+  },
+  "files": [
+    "dist/**/*"
+  ]
+}
