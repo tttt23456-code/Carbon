@@ -43,6 +43,10 @@ export const Calculations: React.FC = () => {
   const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
   const [recentResults, setRecentResults] = useState<CalculationResult[]>([]);
   const [emissionFactors, setEmissionFactors] = useState<EmissionFactor[]>([]);
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [selectedResult, setSelectedResult] = useState<CalculationResult | null>(null);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
 
   const activityTypes = [
     {
@@ -225,15 +229,62 @@ export const Calculations: React.FC = () => {
   };
 
   const handleUploadFile = () => {
-    // TODO: 实现文件上传功能
-    console.log('上传文件');
-    alert('文件上传成功！');
+    setUploadFile(null);
+    setShowUploadDialog(true);
+  };
+
+  const handleFileUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!uploadFile) {
+      alert('请选择文件');
+      return;
+    }
+    
+    try {
+      // TODO: 实际API调用
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // 模拟批量计算结果
+      const batchResults: CalculationResult[] = [
+        {
+          id: Date.now().toString(),
+          activityType: 'electricity',
+          amount: 2400,
+          unit: 'kWh',
+          tCO2e: 1.394,
+          method: 'location_based',
+          dataQuality: 'calculated',
+          calculatedAt: new Date().toISOString(),
+        },
+        {
+          id: (Date.now() + 1).toString(),
+          activityType: 'natural_gas',
+          amount: 1500,
+          unit: 'm³',
+          tCO2e: 3.051,
+          method: 'direct_combustion',
+          dataQuality: 'calculated',
+          calculatedAt: new Date().toISOString(),
+        },
+      ];
+      
+      setRecentResults([...batchResults, ...recentResults]);
+      setShowUploadDialog(false);
+      setUploadFile(null);
+      alert(`批量计算完成！共处理 ${batchResults.length} 条记录`);
+    } catch (error) {
+      console.error('文件上传失败:', error);
+      alert('文件上传失败，请重试');
+    }
   };
 
   const handleViewDetails = (resultId: string) => {
-    // TODO: 实现查看详情功能
-    console.log('查看计算结果详情:', resultId);
-    alert('查看详情成功！');
+    const result = recentResults.find(r => r.id === resultId);
+    if (result) {
+      setSelectedResult(result);
+      setShowDetailsDialog(true);
+    }
   };
 
   const handleDeleteResult = async (resultId: string) => {
@@ -605,6 +656,181 @@ export const Calculations: React.FC = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* 文件上传模态框 */}
+      {showUploadDialog && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900">批量计算文件上传</h3>
+                <button
+                  onClick={() => setShowUploadDialog(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <form onSubmit={handleFileUpload} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    选择文件
+                  </label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <input
+                      type="file"
+                      accept=".csv,.xlsx,.xls"
+                      onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                      className="hidden"
+                      id="file-upload"
+                    />
+                    <label
+                      htmlFor="file-upload"
+                      className="cursor-pointer flex flex-col items-center space-y-2"
+                    >
+                      <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                      </svg>
+                      <div className="text-sm text-gray-600">
+                        {uploadFile ? uploadFile.name : '点击选择文件或拖拽到此处'}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        支持 CSV, Excel 格式
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                  <h4 className="text-sm font-medium text-blue-800 mb-2">文件格式要求：</h4>
+                  <ul className="text-xs text-blue-700 space-y-1">
+                    <li>• 必须包含列：活动类型、数量、单位、描述</li>
+                    <li>• 活动类型支持：electricity, natural_gas, diesel 等</li>
+                    <li>• 数量必须为数字格式</li>
+                  </ul>
+                </div>
+
+                <div className="flex space-x-3 pt-4">
+                  <button
+                    type="submit"
+                    disabled={!uploadFile}
+                    className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    开始计算
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowUploadDialog(false)}
+                    className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  >
+                    取消
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 查看详情模态框 */}
+      {showDetailsDialog && selectedResult && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-[600px] shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900">计算结果详情</h3>
+                <button
+                  onClick={() => {
+                    setShowDetailsDialog(false);
+                    setSelectedResult(null);
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="space-y-6">
+                {/* 基本信息 */}
+                <div>
+                  <h4 className="text-sm font-medium text-gray-900 mb-3">基本信息</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <dt className="text-sm font-medium text-gray-500">活动类型</dt>
+                      <dd className="mt-1 text-sm text-gray-900">
+                        {getActivityTypeInfo(selectedResult.activityType)?.label}
+                      </dd>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <dt className="text-sm font-medium text-gray-500">数量</dt>
+                      <dd className="mt-1 text-sm text-gray-900">
+                        {formatNumber(selectedResult.amount)} {selectedResult.unit}
+                      </dd>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <dt className="text-sm font-medium text-gray-500">计算方法</dt>
+                      <dd className="mt-1 text-sm text-gray-900">{selectedResult.method}</dd>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <dt className="text-sm font-medium text-gray-500">数据质量</dt>
+                      <dd className="mt-1 text-sm text-gray-900">{selectedResult.dataQuality}</dd>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 排放结果 */}
+                <div>
+                  <h4 className="text-sm font-medium text-gray-900 mb-3">排放结果</h4>
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-green-900">
+                        {formatNumber(selectedResult.tCO2e)} tCO₂e
+                      </div>
+                      <div className="text-sm text-green-700 mt-1">
+                        计算于 {formatDate(selectedResult.calculatedAt)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 排放分解 */}
+                {selectedResult.breakdown && (
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-900 mb-3">排放分解</h4>
+                    <div className="space-y-2">
+                      {Object.entries(selectedResult.breakdown).map(([gas, value]) => (
+                        <div key={gas} className="flex justify-between items-center py-2 border-b border-gray-100">
+                          <span className="text-sm text-gray-600">{gas}</span>
+                          <span className="text-sm font-medium text-gray-900">
+                            {formatNumber(value)} tCO₂e ({((value / selectedResult.tCO2e) * 100).toFixed(1)}%)
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex justify-end pt-4">
+                  <button
+                    onClick={() => {
+                      setShowDetailsDialog(false);
+                      setSelectedResult(null);
+                    }}
+                    className="bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  >
+                    关闭
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

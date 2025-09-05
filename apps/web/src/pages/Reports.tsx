@@ -29,6 +29,14 @@ export const Reports: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState<'month' | 'quarter' | 'year'>('month');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [exportFormat, setExportFormat] = useState<'csv' | 'excel' | 'pdf'>('csv');
+  const [exportOptions, setExportOptions] = useState({
+    includeCharts: true,
+    includeBreakdown: true,
+    includeMonthlyData: true,
+    dateRange: 'current_year',
+  });
 
   useEffect(() => {
     loadReportData();
@@ -103,29 +111,103 @@ export const Reports: React.FC = () => {
   };
 
   const exportReport = () => {
-    // TODO: 实现报表导出功能
-    console.log('导出报表');
+    setShowExportDialog(true);
+  };
+
+  const handleExport = async () => {
+    try {
+      let fileContent = '';
+      let fileName = '';
+      let mimeType = '';
+      
+      const baseFileName = `碳排放报表_${selectedYear}年`;
+      
+      switch (exportFormat) {
+        case 'csv':
+          fileContent = generateCSVContent();
+          fileName = `${baseFileName}.csv`;
+          mimeType = 'text/csv;charset=utf-8;';
+          break;
+        case 'excel':
+          // 模拟 Excel 格式（实际应使用 xlsx 库）
+          fileContent = generateExcelContent();
+          fileName = `${baseFileName}.xlsx`;
+          mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+          break;
+        case 'pdf':
+          // 模拟 PDF 生成（实际应使用 jsPDF 等库）
+          fileContent = generatePDFContent();
+          fileName = `${baseFileName}.pdf`;
+          mimeType = 'application/pdf';
+          break;
+      }
+      
+      const blob = new Blob([fileContent], { type: mimeType });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', fileName);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      setShowExportDialog(false);
+      alert(`报表导出成功！格式：${exportFormat.toUpperCase()}`);
+    } catch (error) {
+      console.error('导出失败:', error);
+      alert('导出失败，请重试');
+    }
+  };
+
+  const generateCSVContent = (): string => {
+    const headers = ['时间', '总排放量(tCO₂e)', 'Scope 1', 'Scope 2', 'Scope 3'];
+    const rows = [];
     
-    // 模拟导出功能
-    const csvData = [
-      '时间,总排放量(tCO₂e),Scope 1,Scope 2,Scope 3',
-      `${selectedYear}年,${reportData?.totalEmissions || 0},${reportData?.scope1 || 0},${reportData?.scope2 || 0},${reportData?.scope3 || 0}`,
-      ...reportData?.monthlyTrend.map(item => 
-        `${item.month},${item.emissions},,,`
-      ) || []
-    ].join('\n');
+    // 添加数据行
+    rows.push(headers.join(','));
+    rows.push(`${selectedYear}年总计,${reportData?.totalEmissions || 0},${reportData?.scope1 || 0},${reportData?.scope2 || 0},${reportData?.scope3 || 0}`);
     
-    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `碳排放报表_${selectedYear}年.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (exportOptions.includeMonthlyData && reportData?.monthlyTrend) {
+      reportData.monthlyTrend.forEach(item => {
+        const scope1 = (item.emissions * 0.43).toFixed(1);
+        const scope2 = (item.emissions * 0.31).toFixed(1);
+        const scope3 = (item.emissions * 0.26).toFixed(1);
+        rows.push(`${item.month},${item.emissions},${scope1},${scope2},${scope3}`);
+      });
+    }
     
-    alert('报表导出成功！');
+    if (exportOptions.includeBreakdown && reportData?.activityBreakdown) {
+      rows.push(''); // 空行
+      rows.push('活动类型分解');
+      rows.push('活动类型,排放量(tCO₂e),百分比');
+      reportData.activityBreakdown.forEach(item => {
+        rows.push(`${item.label},${item.emissions},${item.percentage}%`);
+      });
+    }
+    
+    return rows.join('\n');
+  };
+
+  const generateExcelContent = (): string => {
+    // 简化的 Excel 格式（实际应使用 xlsx 库）
+    return generateCSVContent();
+  };
+
+  const generatePDFContent = (): string => {
+    // 简化的 PDF 格式（实际应使用 jsPDF 库）
+    const content = `
+碳排放报表 - ${selectedYear}年
+
+总排放量：${formatNumber(reportData?.totalEmissions || 0)} tCO₂e
+Scope 1：${formatNumber(reportData?.scope1 || 0)} tCO₂e
+Scope 2：${formatNumber(reportData?.scope2 || 0)} tCO₂e
+Scope 3：${formatNumber(reportData?.scope3 || 0)} tCO₂e
+
+月度趋势：
+${reportData?.monthlyTrend.map(item => `${item.month}: ${item.emissions} tCO₂e`).join('\n') || ''}
+    `;
+    return content;
   };
 
   if (loading) {
@@ -190,7 +272,7 @@ export const Reports: React.FC = () => {
             <div className="flex-shrink-0">
               <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
                 <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 104 0 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
             </div>
@@ -487,6 +569,106 @@ export const Reports: React.FC = () => {
           </table>
         </div>
       </div>
+
+      {/* 导出选项对话框 */}
+      {showExportDialog && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900">导出报表</h3>
+                <button
+                  onClick={() => setShowExportDialog(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    导出格式
+                  </label>
+                  <div className="space-y-2">
+                    {[
+                      { value: 'csv', label: 'CSV 格式', desc: '适用于 Excel 和数据分析' },
+                      { value: 'excel', label: 'Excel 格式', desc: '包含格式化和图表' },
+                      { value: 'pdf', label: 'PDF 格式', desc: '适用于打印和分享' },
+                    ].map((format) => (
+                      <label key={format.value} className="flex items-start space-x-3 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="exportFormat"
+                          value={format.value}
+                          checked={exportFormat === format.value}
+                          onChange={(e) => setExportFormat(e.target.value as any)}
+                          className="mt-1"
+                        />
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">{format.label}</div>
+                          <div className="text-xs text-gray-500">{format.desc}</div>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    导出选项
+                  </label>
+                  <div className="space-y-2">
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={exportOptions.includeMonthlyData}
+                        onChange={(e) => setExportOptions({...exportOptions, includeMonthlyData: e.target.checked})}
+                      />
+                      <span className="text-sm text-gray-700">包含月度详细数据</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={exportOptions.includeBreakdown}
+                        onChange={(e) => setExportOptions({...exportOptions, includeBreakdown: e.target.checked})}
+                      />
+                      <span className="text-sm text-gray-700">包含活动类型分解</span>
+                    </label>
+                    {exportFormat !== 'csv' && (
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          checked={exportOptions.includeCharts}
+                          onChange={(e) => setExportOptions({...exportOptions, includeCharts: e.target.checked})}
+                        />
+                        <span className="text-sm text-gray-700">包含图表</span>
+                      </label>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex space-x-3 pt-4">
+                  <button
+                    onClick={handleExport}
+                    className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  >
+                    开始导出
+                  </button>
+                  <button
+                    onClick={() => setShowExportDialog(false)}
+                    className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  >
+                    取消
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

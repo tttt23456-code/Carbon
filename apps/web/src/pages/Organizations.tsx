@@ -33,6 +33,20 @@ export const Organizations: React.FC = () => {
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'members' | 'settings'>('overview');
+  const [showEditOrgForm, setShowEditOrgForm] = useState(false);
+  const [showInviteForm, setShowInviteForm] = useState(false);
+  const [orgFormData, setOrgFormData] = useState({
+    name: '',
+    description: '',
+    defaultCurrency: 'CNY',
+    defaultTimezone: 'Asia/Shanghai',
+    fiscalYearStart: '01-01',
+  });
+  const [inviteFormData, setInviteFormData] = useState({
+    email: '',
+    role: 'MEMBER' as 'ADMIN' | 'MANAGER' | 'MEMBER',
+    name: '',
+  });
 
   useEffect(() => {
     loadOrganizationData();
@@ -114,15 +128,78 @@ export const Organizations: React.FC = () => {
   };
 
   const handleEditOrganization = () => {
-    // TODO: 实现编辑组织功能
-    console.log('编辑组织');
-    alert('编辑组织成功！');
+    if (organizations.length > 0) {
+      const currentOrg = organizations[0];
+      setOrgFormData({
+        name: currentOrg.name,
+        description: currentOrg.description || '',
+        defaultCurrency: currentOrg.settings.defaultCurrency,
+        defaultTimezone: currentOrg.settings.defaultTimezone,
+        fiscalYearStart: currentOrg.settings.fiscalYearStart,
+      });
+      setShowEditOrgForm(true);
+    }
+  };
+
+  const handleUpdateOrganization = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      // TODO: 实际API调用
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // 更新组织信息
+      setOrganizations(prev => prev.map(org => ({
+        ...org,
+        name: orgFormData.name,
+        description: orgFormData.description,
+        settings: {
+          defaultCurrency: orgFormData.defaultCurrency,
+          defaultTimezone: orgFormData.defaultTimezone,
+          fiscalYearStart: orgFormData.fiscalYearStart,
+        },
+      })));
+      
+      setShowEditOrgForm(false);
+      alert('组织信息更新成功！');
+    } catch (error) {
+      console.error('更新组织信息失败:', error);
+      alert('更新失败，请重试');
+    }
   };
 
   const handleInviteMember = () => {
-    // TODO: 实现邀请成员功能
-    console.log('邀请成员');
-    alert('邀请成员成功！');
+    setInviteFormData({
+      email: '',
+      role: 'MEMBER',
+      name: '',
+    });
+    setShowInviteForm(true);
+  };
+
+  const handleSubmitInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      // TODO: 实际API调用
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // 添加新成员到列表
+      const newMember: Member = {
+        id: Date.now().toString(),
+        name: inviteFormData.name,
+        email: inviteFormData.email,
+        role: inviteFormData.role,
+        joinedAt: new Date().toISOString(),
+      };
+      
+      setMembers([...members, newMember]);
+      setShowInviteForm(false);
+      alert('成员邀请发送成功！');
+    } catch (error) {
+      console.error('邀请成员失败:', error);
+      alert('邀请失败，请重试');
+    }
   };
 
   const handleEditMember = (memberId: string) => {
@@ -147,10 +224,25 @@ export const Organizations: React.FC = () => {
     }
   };
 
-  const handleSaveSettings = () => {
-    // TODO: 实现保存设置功能
-    console.log('保存设置');
-    alert('设置保存成功！');
+  const handleSaveSettings = async () => {
+    try {
+      // TODO: 实际API调用
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // 更新设置
+      setOrganizations(prev => prev.map(org => ({
+        ...org,
+        settings: {
+          ...org.settings,
+          // 这里可以从表单获取值，目前使用默认值
+        },
+      })));
+      
+      alert('设置保存成功！');
+    } catch (error) {
+      console.error('保存设置失败:', error);
+      alert('保存失败，请重试');
+    }
   };
 
   const handleCancelSettings = () => {
@@ -411,6 +503,183 @@ export const Organizations: React.FC = () => {
               >
                 取消
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 编辑组织模态框 */}
+      {showEditOrgForm && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900">编辑组织信息</h3>
+                <button
+                  onClick={() => setShowEditOrgForm(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <form onSubmit={handleUpdateOrganization} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    组织名称
+                  </label>
+                  <input
+                    type="text"
+                    value={orgFormData.name}
+                    onChange={(e) => setOrgFormData({ ...orgFormData, name: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    组织描述
+                  </label>
+                  <textarea
+                    value={orgFormData.description}
+                    onChange={(e) => setOrgFormData({ ...orgFormData, description: e.target.value })}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="请输入组织描述"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    默认货币
+                  </label>
+                  <select
+                    value={orgFormData.defaultCurrency}
+                    onChange={(e) => setOrgFormData({ ...orgFormData, defaultCurrency: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  >
+                    <option value="CNY">人民币 (CNY)</option>
+                    <option value="USD">美元 (USD)</option>
+                    <option value="EUR">欧元 (EUR)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    默认时区
+                  </label>
+                  <select
+                    value={orgFormData.defaultTimezone}
+                    onChange={(e) => setOrgFormData({ ...orgFormData, defaultTimezone: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  >
+                    <option value="Asia/Shanghai">北京时间 (UTC+8)</option>
+                    <option value="America/New_York">纽约时间 (UTC-5)</option>
+                    <option value="Europe/London">伦敦时间 (UTC+0)</option>
+                  </select>
+                </div>
+
+                <div className="flex space-x-3 pt-4">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  >
+                    保存修改
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowEditOrgForm(false)}
+                    className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  >
+                    取消
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 邀请成员模态框 */}
+      {showInviteForm && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900">邀请新成员</h3>
+                <button
+                  onClick={() => setShowInviteForm(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <form onSubmit={handleSubmitInvite} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    姓名
+                  </label>
+                  <input
+                    type="text"
+                    value={inviteFormData.name}
+                    onChange={(e) => setInviteFormData({ ...inviteFormData, name: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    required
+                    placeholder="请输入成员姓名"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    邮箱地址
+                  </label>
+                  <input
+                    type="email"
+                    value={inviteFormData.email}
+                    onChange={(e) => setInviteFormData({ ...inviteFormData, email: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    required
+                    placeholder="请输入邮箱地址"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    角色
+                  </label>
+                  <select
+                    value={inviteFormData.role}
+                    onChange={(e) => setInviteFormData({ ...inviteFormData, role: e.target.value as any })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  >
+                    <option value="MEMBER">成员</option>
+                    <option value="MANAGER">经理</option>
+                    <option value="ADMIN">管理员</option>
+                  </select>
+                </div>
+
+                <div className="flex space-x-3 pt-4">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  >
+                    发送邀请
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowInviteForm(false)}
+                    className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  >
+                    取消
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>

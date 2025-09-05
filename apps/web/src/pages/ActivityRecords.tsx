@@ -41,7 +41,16 @@ export const ActivityRecords: React.FC = () => {
   const [records, setRecords] = useState<ActivityRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<ActivityRecord | null>(null);
   const [formData, setFormData] = useState<CreateActivityForm>({
+    activityType: '',
+    description: '',
+    amount: 0,
+    unit: '',
+    dataQuality: 'measured',
+  });
+  const [editFormData, setEditFormData] = useState<CreateActivityForm>({
     activityType: '',
     description: '',
     amount: 0,
@@ -166,9 +175,55 @@ export const ActivityRecords: React.FC = () => {
   };
 
   const handleEditRecord = (recordId: string) => {
-    // TODO: 实现编辑功能
-    console.log('编辑记录:', recordId);
-    alert('编辑记录成功！');
+    const record = records.find(r => r.id === recordId);
+    if (record) {
+      setEditingRecord(record);
+      setEditFormData({
+        activityType: record.activityType,
+        description: record.description,
+        amount: record.amount,
+        unit: record.unit,
+        dataQuality: record.dataQuality,
+        facilityId: record.facility?.id,
+        projectId: record.project?.id,
+      });
+      setShowEditForm(true);
+    }
+  };
+
+  const handleUpdateRecord = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!editingRecord) return;
+    
+    try {
+      // TODO: 实际API调用
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // 更新记录
+      const updatedRecord: ActivityRecord = {
+        ...editingRecord,
+        ...editFormData,
+        updatedAt: new Date().toISOString(),
+      };
+      
+      setRecords(records.map(record => 
+        record.id === editingRecord.id ? updatedRecord : record
+      ));
+      setShowEditForm(false);
+      setEditingRecord(null);
+      setEditFormData({
+        activityType: '',
+        description: '',
+        amount: 0,
+        unit: '',
+        dataQuality: 'measured',
+      });
+      alert('记录更新成功！');
+    } catch (error) {
+      console.error('更新活动记录失败:', error);
+      alert('更新失败，请重试');
+    }
   };
 
   const handleDeleteRecord = async (recordId: string) => {
@@ -499,6 +554,135 @@ export const ActivityRecords: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setShowCreateForm(false)}
+                    className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  >
+                    取消
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 编辑表单模态框 */}
+      {showEditForm && editingRecord && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900">编辑活动记录</h3>
+                <button
+                  onClick={() => {
+                    setShowEditForm(false);
+                    setEditingRecord(null);
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <form onSubmit={handleUpdateRecord} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    活动类型
+                  </label>
+                  <select
+                    value={editFormData.activityType}
+                    onChange={(e) => {
+                      const selectedType = activityTypes.find(t => t.value === e.target.value);
+                      setEditFormData({
+                        ...editFormData,
+                        activityType: e.target.value,
+                        unit: selectedType?.unit || '',
+                      });
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    required
+                  >
+                    <option value="">请选择活动类型</option>
+                    {activityTypes.map((type) => (
+                      <option key={type.value} value={type.value}>
+                        {type.label} (Scope {type.scope})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    描述
+                  </label>
+                  <input
+                    type="text"
+                    value={editFormData.description}
+                    onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="请输入活动描述"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      数量
+                    </label>
+                    <input
+                      type="number"
+                      step="any"
+                      value={editFormData.amount}
+                      onChange={(e) => setEditFormData({ ...editFormData, amount: parseFloat(e.target.value) || 0 })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      required
+                      min="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      单位
+                    </label>
+                    <input
+                      type="text"
+                      value={editFormData.unit}
+                      onChange={(e) => setEditFormData({ ...editFormData, unit: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    数据质量
+                  </label>
+                  <select
+                    value={editFormData.dataQuality}
+                    onChange={(e) => setEditFormData({ ...editFormData, dataQuality: e.target.value as any })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  >
+                    <option value="measured">实测</option>
+                    <option value="calculated">计算</option>
+                    <option value="estimated">估算</option>
+                  </select>
+                </div>
+
+                <div className="flex space-x-3 pt-4">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  >
+                    更新记录
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowEditForm(false);
+                      setEditingRecord(null);
+                    }}
                     className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
                   >
                     取消
