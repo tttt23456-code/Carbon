@@ -292,6 +292,7 @@ model EmissionFactor {
   organizationId String?       // null表示系统内置因子
   
   source         String
+  sourceType     String        @default("CUSTOM") // STANDARD, CUSTOM, ORGANIZATION
   region         String        // 地区代码，如 "CN", "US", "EU", "GLOBAL"
   year           Int           // 适用年份
   

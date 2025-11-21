@@ -7,6 +7,7 @@ import { ActivityRecords } from './pages/ActivityRecords';
 import { Calculations } from './pages/Calculations';
 import { Reports } from './pages/Reports';
 import { Organizations } from './pages/Organizations';
+import { EmissionFactors } from './pages/EmissionFactors';
 import { DashboardLayout } from './components/DashboardLayout';
 import { useAuthStore } from './hooks/useAuthStore';
 
@@ -54,6 +55,13 @@ function App() {
           <ProtectedRoute>
             <DashboardLayout>
               <Organizations />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/dashboard/emission-factors" element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <EmissionFactors />
             </DashboardLayout>
           </ProtectedRoute>
         } />

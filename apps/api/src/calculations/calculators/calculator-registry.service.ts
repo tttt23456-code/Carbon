@@ -5,6 +5,7 @@ import { FuelCombustionCalculator } from './fuel-combustion.calculator';
 import { FlightCalculator } from './flight.calculator';
 import { FreightCalculator } from './freight.calculator';
 import { WasteCalculator } from './waste.calculator';
+import { BusinessTravelCalculator } from './business-travel.calculator';
 
 /**
  * 计算器注册表
@@ -21,6 +22,7 @@ export class CalculatorRegistry {
     private flightCalculator: FlightCalculator,
     private freightCalculator: FreightCalculator,
     private wasteCalculator: WasteCalculator,
+    private businessTravelCalculator: BusinessTravelCalculator,
   ) {
     this.registerCalculators();
   }
@@ -34,6 +36,7 @@ export class CalculatorRegistry {
     this.registerCalculator(this.flightCalculator);
     this.registerCalculator(this.freightCalculator);
     this.registerCalculator(this.wasteCalculator);
+    this.registerCalculator(this.businessTravelCalculator);
 
     this.logger.log(`已注册 ${this.calculators.size} 个计算器`);
   }

@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { DataQualityService } from './data-quality.service';
 import { 
   CreateActivityRecordDto, 
   UpdateActivityRecordDto, 
@@ -9,7 +10,10 @@ import {
 
 @Injectable()
 export class ActivityRecordsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly dataQualityService: DataQualityService,
+  ) {}
 
   async create(createDto: CreateActivityRecordDto, organizationId: string, userId: string) {
     // 验证项目和设施是否属于该组织

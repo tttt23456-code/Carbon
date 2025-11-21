@@ -40,19 +40,70 @@
 git clone https://github.com/carbon-calculator/carbon.git
 cd carbon
 
-# 2. 安装依赖
-npm install
+# 2. 安装根目录依赖
+pnpm install
 
-# 3. 启动后端 API
-cd apps/api
-npm dev
+# 3. 启动后端 API (端口 3001)
+pnpm --filter api dev
 
-# 4. 启动前端 Web (新终端)
-cd apps/web  
-npm dev
+# 4. 启动前端 Web (新终端窗口，端口 3000)
+pnpm --filter web dev
 ```
 
 > 🎉 **重大改进**: 现在使用 SQLite 数据库，无需 Docker！系统启动更加简单快速。
+
+### 前后端启动说明
+
+#### 后端 API 启动
+
+后端基于 NestJS 构建，使用 pnpm 作为包管理器：
+
+```bash
+# 进入项目根目录
+cd carbon
+
+# 安装依赖
+pnpm install
+
+# 启动后端服务 (开发模式)
+pnpm --filter api dev
+
+# 或者进入后端目录启动
+cd apps/api
+pnpm dev
+```
+
+后端服务启动后将在 `http://localhost:3001` 运行，包含以下功能：
+- RESTful API 接口
+- Swagger API 文档 (http://localhost:3001/api/docs)
+- 数据库连接 (SQLite)
+- JWT 认证系统
+
+#### 前端 Web 启动
+
+前端基于 React + Vite 构建：
+
+```bash
+# 进入项目根目录
+cd carbon
+
+# 安装依赖
+pnpm install
+
+# 启动前端服务 (开发模式)
+pnpm --filter web dev
+
+# 或者进入前端目录启动
+cd apps/web
+pnpm dev
+```
+
+前端服务启动后将在 `http://localhost:3000` 运行，包含以下功能：
+- 用户认证界面
+- 碳排放数据管理
+- 计算引擎界面
+- 报表和可视化
+- 组织管理功能
 
 ## 🖥️ 本机启动演示
 
@@ -60,24 +111,20 @@ npm dev
 
 ✨ **最新简化版本** - 无需 Docker，使用 SQLite 数据库
 
-``powershell
+```powershell
 # Windows 用户
 # 1. 克隆或下载项目到本地
 git clone https://github.com/carbon-calculator/carbon.git
 cd carbon
 
 # 2. 安装依赖
-npm install  # 使用 npm 或 pnpm install
+pnpm install  # 使用 pnpm 或 npm install
 
-# 3. 启动后端 API
-cd apps/api
-npm install
-npm run dev  # 后端将在 http://localhost:3001 启动
+# 3. 启动后端 API (端口 3001)
+pnpm --filter api dev
 
-# 4. 启动前端应用（新终端窗口）
-cd apps/web
-npm install
-npm run dev  # 前端将在 http://localhost:3000 启动
+# 4. 启动前端应用（新终端窗口，端口 3000）
+pnpm --filter web dev
 
 # 5. 打开浏览器访问 http://localhost:3000
 # 使用演示账号登录：admin@caict-carbon.com / admin123
@@ -90,17 +137,13 @@ git clone https://github.com/carbon-calculator/carbon.git
 cd carbon
 
 # 2. 安装依赖
-npm install
+pnpm install
 
-# 3. 启动后端
-cd apps/api
-npm install  
-npm run dev
+# 3. 启动后端 API (端口 3001)
+pnpm --filter api dev
 
-# 4. 启动前端（新终端）
-cd apps/web
-npm install
-npm run dev
+# 4. 启动前端（新终端窗口，端口 3000）
+pnpm --filter web dev
 
 # 5. 访问 http://localhost:3000 体验
 ```
@@ -109,7 +152,7 @@ npm run dev
 
 如果您喜欢容器化部署：
 
-``bash
+```bash
 # 确保安装了 Docker 和 Docker Compose
 # 1. 克隆项目
 git clone https://github.com/carbon-calculator/carbon.git
@@ -163,7 +206,7 @@ docker-compose -f infra/docker/docker-compose.yml up -d
 # 如果遇到依赖问题，清除缓存重新安装
 rm -rf node_modules package-lock.json  # Linux/macOS
 Remove-Item -Recurse -Force node_modules, package-lock.json  # Windows
-npm install
+pnpm install
 ```
 
 **后端启动失败**
@@ -213,8 +256,8 @@ DATABASE_URL="file:./dev.db"
 
 # 初始化数据库（首次运行自动执行）
 cd apps/api
-pnpm prisma:push     # 创建数据库结构
-pnpm prisma:seed     # 导入示例数据（可选）
+pnpm db:migrate     # 创建数据库结构
+pnpm db:seed     # 导入示例数据（可选）
 ```
 
 **SQLite 优势**:
@@ -239,22 +282,21 @@ DATABASE_URL="postgresql://username:password@localhost:5432/carbon_db"
 
 # 3. 重新生成 Prisma 客户端
 cd apps/api
-pnpm prisma:generate
-pnpm prisma:push
+pnpm db:generate
+pnpm db:migrate:deploy
 ```
 
 ### 数据库管理
 
 ```bash
 # 查看数据库结构
-pnpm prisma:studio    # 打开 Prisma Studio
+pnpm --filter api db:studio    # 打开 Prisma Studio
 
 # 数据库迁移
-pnpm prisma:migrate   # 创建迁移文件
-pnpm prisma:push      # 直接推送到数据库
+pnpm --filter api db:migrate   # 创建迁移文件
 
 # 重置数据库
-pnpm prisma:reset     # 清空并重建数据库
+pnpm --filter api db:reset     # 清空并重建数据库
 ```
 
 ## 📋 项目结构
@@ -467,8 +509,8 @@ const result = await api.calculations.calculate({
 # 运行系统功能验证
 node scripts/validate-system.js
 
-# 或者使用 npm
-npm run validate
+# 或者使用 pnpm
+pnpm validate
 ```
 
 验证内容包括：
@@ -484,7 +526,7 @@ npm run validate
 
 ## 🧪 测试
 
-``bash
+```bash
 # 运行所有测试
 pnpm test
 
@@ -687,7 +729,7 @@ chore: 构建过程或辅助工具的变动
 
 1. **⚡ 2分钟快速启动**：按照"方式一"启动系统，体验完整功能
 2. **🎮 功能演示**：按照演示流程依次体验各个功能模块
-3. **🔧 系统验证**：运行 `npm run validate` 验证系统完整性
+3. **🔧 系统验证**：运行 `pnpm validate` 验证系统完整性
 4. **🐳 容器部署**：如有需要，尝试 Docker 部署体验
 
 ### 💡 核心亮点

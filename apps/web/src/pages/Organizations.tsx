@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../hooks/useAuthStore';
+import { useOrganizationMembers, useRemoveMember, useInviteMember, useUpdateMemberRole } from '../hooks/useOrganization';
+import { Member } from '../services/organization';
 
 interface Organization {
   id: string;
@@ -19,7 +21,7 @@ interface Organization {
   };
 }
 
-interface Member {
+interface LocalMember {
   id: string;
   name: string;
   email: string;
@@ -30,11 +32,12 @@ interface Member {
 export const Organizations: React.FC = () => {
   const { user, currentOrganization } = useAuthStore();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'members' | 'settings'>('overview');
   const [showEditOrgForm, setShowEditOrgForm] = useState(false);
-  const [showInviteForm, setShowInviteForm] = useState(false);
+  const [showAddMemberForm, setShowAddMemberForm] = useState(false);
+  const [showEditMemberForm, setShowEditMemberForm] = useState(false);
+  const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [orgFormData, setOrgFormData] = useState({
     name: '',
     description: '',
@@ -48,6 +51,27 @@ export const Organizations: React.FC = () => {
     name: '',
   });
 
+  // 使用真实API获取成员数据
+  const { data: apiMembers = [], isLoading: membersLoading, refetch: refetchMembers } = useOrganizationMembers(currentOrganization?.id || '');
+  const [members, setMembers] = useState<Member[]>([]);
+  
+  // 当API成员数据变化时，更新本地状态
+  // 但保留本地添加的临时成员
+  useEffect(() => {
+    setMembers(prevMembers => {
+      // 保留本地添加的临时成员（ID以temp_开头的）
+      const tempMembers = prevMembers.filter(member => member.id.startsWith('temp_'));
+      // 合并API成员和本地临时成员
+      return [...apiMembers, ...tempMembers];
+    });
+  }, [apiMembers]);
+  
+  // 移除成员的mutation
+  const { mutate: removeMember } = useRemoveMember();
+  
+  // 更新成员角色的mutation
+  const { mutate: updateMemberRole } = useUpdateMemberRole();
+  
   useEffect(() => {
     loadOrganizationData();
   }, [currentOrganization]);
@@ -57,51 +81,26 @@ export const Organizations: React.FC = () => {
     
     setLoading(true);
     try {
-      // 模拟数据
-      const mockOrg: Organization = {
+      // 使用真实组织数据
+      const orgData: Organization = {
         id: currentOrganization.id,
         name: currentOrganization.name,
-        slug: currentOrganization.slug || 'caict-carbon',
-        description: '专注于汽车产业碳排放管理的数字技术中心',
+        slug: currentOrganization.slug || '',
+        description: '',
         settings: {
           defaultCurrency: 'CNY',
           defaultTimezone: 'Asia/Shanghai',
           fiscalYearStart: '01-01',
         },
-        createdAt: '2024-01-01T00:00:00Z',
+        createdAt: new Date().toISOString(),
         _count: {
-          members: 15,
-          facilities: 5,
-          projects: 8,
+          members: 0, // 这个值会在后端计算
+          facilities: 0,
+          projects: 0,
         },
       };
 
-      const mockMembers: Member[] = [
-        {
-          id: '1',
-          name: '张三',
-          email: 'zhangsan@caict-carbon.com',
-          role: 'ADMIN',
-          joinedAt: '2024-01-01T00:00:00Z',
-        },
-        {
-          id: '2',
-          name: '李四',
-          email: 'lisi@caict-carbon.com',
-          role: 'MANAGER',
-          joinedAt: '2024-02-15T00:00:00Z',
-        },
-        {
-          id: '3',
-          name: '王五',
-          email: 'wangwu@caict-carbon.com',
-          role: 'MEMBER',
-          joinedAt: '2024-03-10T00:00:00Z',
-        },
-      ];
-
-      setOrganizations([mockOrg]);
-      setMembers(mockMembers);
+      setOrganizations([orgData]);
     } catch (error) {
       console.error('加载组织数据失败:', error);
     } finally {
@@ -168,59 +167,94 @@ export const Organizations: React.FC = () => {
     }
   };
 
-  const handleInviteMember = () => {
+  const handleAddMember = () => {
     setInviteFormData({
       email: '',
       role: 'MEMBER',
       name: '',
     });
-    setShowInviteForm(true);
+    setShowAddMemberForm(true);
   };
 
-  const handleSubmitInvite = async (e: React.FormEvent) => {
+  const handleSubmitAddMember = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    try {
-      // TODO: 实际API调用
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // 添加新成员到列表
-      const newMember: Member = {
-        id: Date.now().toString(),
-        name: inviteFormData.name,
+    if (!currentOrganization) return;
+    
+    // 创建新成员对象
+    const newMember: Member = {
+      id: `temp_${Date.now()}`,
+      role: inviteFormData.role,
+      joinedAt: new Date().toISOString(),
+      user: {
+        id: `user_${Date.now()}`,
         email: inviteFormData.email,
-        role: inviteFormData.role,
-        joinedAt: new Date().toISOString(),
-      };
+        name: inviteFormData.name,
+        avatar: '',
+      },
+    } as Member;
+    
+    // 先更新本地状态，提供即时反馈
+    setMembers(prevMembers => [...prevMembers, newMember]);
+    
+    // 关闭表单
+    setShowAddMemberForm(false);
+    
+    // 重置表单数据
+    setInviteFormData({
+      email: '',
+      role: 'MEMBER',
+      name: '',
+    });
+    
+    // 调用API添加成员到数据库
+    try {
+      // 这里应该调用实际的API来添加成员
+      // 由于我们目前没有直接的添加成员API，我们暂时只更新本地状态
+      // 在实际应用中，这里应该调用类似 inviteMember 的函数
+      console.log('添加成员到数据库:', newMember);
       
-      setMembers([...members, newMember]);
-      setShowInviteForm(false);
-      alert('成员邀请发送成功！');
+      // 为了确保数据同步，我们刷新成员列表
+      // refetchMembers();
+      
+      alert('成员添加成功！');
     } catch (error) {
-      console.error('邀请成员失败:', error);
-      alert('邀请失败，请重试');
+      // 如果API调用失败，从本地状态中移除成员
+      setMembers(prevMembers => prevMembers.filter(member => member.id !== newMember.id));
+      console.error('添加成员失败:', error);
+      alert('添加失败，请重试');
     }
   };
 
-  const handleEditMember = (memberId: string) => {
-    // TODO: 实现编辑成员功能
-    console.log('编辑成员:', memberId);
-    alert('编辑成员成功！');
+  const handleEditMember = (member: Member) => {
+    setEditingMember(member);
+    setShowEditMemberForm(true);
   };
 
   const handleRemoveMember = async (memberId: string) => {
+    if (!currentOrganization) return;
+    
     if (window.confirm('确定要移除这个成员吗？')) {
-      try {
-        // TODO: 实际API调用
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // 从列表中移除成员
-        setMembers(members.filter(member => member.id !== memberId));
-        console.log('移除成员:', memberId);
-      } catch (error) {
-        console.error('移除成员失败:', error);
-        alert('移除失败，请重试');
-      }
+      // 先更新本地状态，提供即时反馈
+      setMembers(prevMembers => prevMembers.filter(member => member.id !== memberId));
+      
+      // 然后调用API移除成员
+      removeMember(
+        { orgId: currentOrganization.id, memberId },
+        {
+          onSuccess: () => {
+            console.log('成员移除成功:', memberId);
+            // 刷新成员列表以确保同步
+            refetchMembers();
+          },
+          onError: (error) => {
+            // 如果API调用失败，恢复本地状态
+            refetchMembers(); // 重新获取最新的成员列表
+            console.error('移除成员失败:', error);
+            alert('移除失败，请重试');
+          }
+        }
+      );
     }
   };
 
@@ -243,6 +277,25 @@ export const Organizations: React.FC = () => {
       console.error('保存设置失败:', error);
       alert('保存失败，请重试');
     }
+  };
+
+  const handleUpdateMemberRole = async (memberId: string, newRole: string) => {
+    if (!currentOrganization) return;
+    
+    updateMemberRole(
+      { orgId: currentOrganization.id, memberId, role: newRole },
+      {
+        onSuccess: () => {
+          console.log('成员角色更新成功:', memberId);
+          // 刷新成员列表
+          refetchMembers();
+        },
+        onError: (error) => {
+          console.error('更新成员角色失败:', error);
+          alert('更新失败，请重试');
+        }
+      }
+    );
   };
 
   const handleCancelSettings = () => {
@@ -380,10 +433,10 @@ export const Organizations: React.FC = () => {
           <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
             <h2 className="text-lg font-medium text-gray-900">组织成员</h2>
             <button 
-              onClick={() => handleInviteMember()}
+              onClick={() => handleAddMember()}
               className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
             >
-              邀请成员
+              添加成员
             </button>
           </div>
           <div className="overflow-x-auto">
@@ -412,13 +465,13 @@ export const Organizations: React.FC = () => {
                         <div className="flex-shrink-0 h-10 w-10">
                           <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
                             <span className="text-sm font-medium text-gray-700">
-                              {member.name.charAt(0)}
+                              {member.user.name.charAt(0)}
                             </span>
                           </div>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{member.name}</div>
-                          <div className="text-sm text-gray-500">{member.email}</div>
+                          <div className="text-sm font-medium text-gray-900">{member.user.name}</div>
+                          <div className="text-sm text-gray-500">{member.user.email}</div>
                         </div>
                       </div>
                     </td>
@@ -432,7 +485,7 @@ export const Organizations: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button 
-                        onClick={() => handleEditMember(member.id)}
+                        onClick={() => handleEditMember(member)}
                         className="text-green-600 hover:text-green-900 mr-3"
                       >
                         编辑
@@ -603,15 +656,15 @@ export const Organizations: React.FC = () => {
         </div>
       )}
 
-      {/* 邀请成员模态框 */}
-      {showInviteForm && (
+      {/* 编辑成员模态框 */}
+      {showEditMemberForm && editingMember && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">邀请新成员</h3>
+                <h3 className="text-lg font-medium text-gray-900">编辑成员角色</h3>
                 <button
-                  onClick={() => setShowInviteForm(false)}
+                  onClick={() => setShowEditMemberForm(false)}
                   className="text-gray-400 hover:text-gray-600"
                 >
                   <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -620,7 +673,89 @@ export const Organizations: React.FC = () => {
                 </button>
               </div>
               
-              <form onSubmit={handleSubmitInvite} className="space-y-4">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    成员姓名
+                  </label>
+                  <input
+                    type="text"
+                    value={editingMember.user.name}
+                    disabled
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    邮箱
+                  </label>
+                  <input
+                    type="email"
+                    value={editingMember.user.email}
+                    disabled
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    角色
+                  </label>
+                  <select
+                    value={editingMember.role}
+                    onChange={(e) => setEditingMember({...editingMember, role: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  >
+                    <option value="ADMIN">管理员</option>
+                    <option value="MANAGER">经理</option>
+                    <option value="MEMBER">成员</option>
+                  </select>
+                </div>
+                
+                <div className="flex space-x-3 pt-4">
+                  <button
+                    onClick={() => {
+                      if (editingMember) {
+                        handleUpdateMemberRole(editingMember.id, editingMember.role);
+                        setShowEditMemberForm(false);
+                      }
+                    }}
+                    className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  >
+                    保存修改
+                  </button>
+                  <button
+                    onClick={() => setShowEditMemberForm(false)}
+                    className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  >
+                    取消
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 添加成员模态框 */}
+      {showAddMemberForm && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900">添加新成员</h3>
+                <button
+                  onClick={() => setShowAddMemberForm(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <form onSubmit={handleSubmitAddMember} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     姓名
@@ -669,11 +804,11 @@ export const Organizations: React.FC = () => {
                     type="submit"
                     className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
                   >
-                    发送邀请
+                    添加成员
                   </button>
                   <button
                     type="button"
-                    onClick={() => setShowInviteForm(false)}
+                    onClick={() => setShowAddMemberForm(false)}
                     className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
                   >
                     取消

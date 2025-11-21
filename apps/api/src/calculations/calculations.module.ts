@@ -9,6 +9,7 @@ import { FuelCombustionCalculator } from './calculators/fuel-combustion.calculat
 import { FlightCalculator } from './calculators/flight.calculator';
 import { FreightCalculator } from './calculators/freight.calculator';
 import { WasteCalculator } from './calculators/waste.calculator';
+import { BusinessTravelCalculator } from './calculators/business-travel.calculator';
 
 @Module({
   imports: [JwtModule],
@@ -28,6 +29,7 @@ import { WasteCalculator } from './calculators/waste.calculator';
     FlightCalculator,
     FreightCalculator,
     WasteCalculator,
+    BusinessTravelCalculator,
     CalculatorRegistry,
     
     // 主服务
