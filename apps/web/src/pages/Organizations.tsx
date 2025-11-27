@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../hooks/useAuthStore';
 import { useOrganizationMembers, useRemoveMember, useInviteMember, useUpdateMemberRole } from '../hooks/useOrganization';
 import { Member } from '../services/organization';
+import { organizationService } from '../services/organization';
 
 interface Organization {
   id: string;
@@ -56,15 +57,18 @@ export const Organizations: React.FC = () => {
   const [members, setMembers] = useState<Member[]>([]);
   
   // 当API成员数据变化时，更新本地状态
-  // 但保留本地添加的临时成员
   useEffect(() => {
-    setMembers(prevMembers => {
-      // 保留本地添加的临时成员（ID以temp_开头的）
-      const tempMembers = prevMembers.filter(member => member.id.startsWith('temp_'));
-      // 合并API成员和本地临时成员
-      return [...apiMembers, ...tempMembers];
-    });
+    if (apiMembers && apiMembers.length > 0) {
+      setMembers(apiMembers);
+    }
   }, [apiMembers]);
+  
+  // 当组织变化时，重新获取成员数据
+  useEffect(() => {
+    if (currentOrganization?.id) {
+      refetchMembers();
+    }
+  }, [currentOrganization?.id, refetchMembers]);
   
   // 移除成员的mutation
   const { mutate: removeMember } = useRemoveMember();
@@ -139,31 +143,58 @@ export const Organizations: React.FC = () => {
       setShowEditOrgForm(true);
     }
   };
+  
+  // 当切换到设置标签页时，初始化表单数据
+  useEffect(() => {
+    if (activeTab === 'settings' && organizations.length > 0) {
+      const currentOrg = organizations[0];
+      setOrgFormData({
+        name: currentOrg.name,
+        description: currentOrg.description || '',
+        defaultCurrency: currentOrg.settings.defaultCurrency,
+        defaultTimezone: currentOrg.settings.defaultTimezone,
+        fiscalYearStart: currentOrg.settings.fiscalYearStart,
+      });
+    }
+  }, [activeTab, organizations]);
 
   const handleUpdateOrganization = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!currentOrganization) return;
+    
     try {
-      // TODO: 实际API调用
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // 更新组织信息
-      setOrganizations(prev => prev.map(org => ({
-        ...org,
+      // 调用API更新组织信息
+      const updatedOrg = await organizationService.update(currentOrganization.id, {
         name: orgFormData.name,
         description: orgFormData.description,
+        timezone: orgFormData.defaultTimezone,
         settings: {
           defaultCurrency: orgFormData.defaultCurrency,
           defaultTimezone: orgFormData.defaultTimezone,
           fiscalYearStart: orgFormData.fiscalYearStart,
-        },
-      })));
+        }
+      });
+      
+      // 更新本地状态
+      setOrganizations(prev => prev.map(org => 
+        org.id === currentOrganization.id ? {
+          ...org,
+          name: orgFormData.name,
+          description: orgFormData.description,
+          settings: {
+            defaultCurrency: orgFormData.defaultCurrency,
+            defaultTimezone: orgFormData.defaultTimezone,
+            fiscalYearStart: orgFormData.fiscalYearStart,
+          }
+        } : org
+      ));
       
       setShowEditOrgForm(false);
       alert('组织信息更新成功！');
-    } catch (error) {
+    } catch (error: any) {
       console.error('更新组织信息失败:', error);
-      alert('更新失败，请重试');
+      alert(error.response?.data?.message || '更新失败，请重试');
     }
   };
 
@@ -181,48 +212,31 @@ export const Organizations: React.FC = () => {
     
     if (!currentOrganization) return;
     
-    // 创建新成员对象
-    const newMember: Member = {
-      id: `temp_${Date.now()}`,
-      role: inviteFormData.role,
-      joinedAt: new Date().toISOString(),
-      user: {
-        id: `user_${Date.now()}`,
-        email: inviteFormData.email,
-        name: inviteFormData.name,
-        avatar: '',
-      },
-    } as Member;
-    
-    // 先更新本地状态，提供即时反馈
-    setMembers(prevMembers => [...prevMembers, newMember]);
-    
-    // 关闭表单
-    setShowAddMemberForm(false);
-    
-    // 重置表单数据
-    setInviteFormData({
-      email: '',
-      role: 'MEMBER',
-      name: '',
-    });
-    
-    // 调用API添加成员到数据库
     try {
-      // 这里应该调用实际的API来添加成员
-      // 由于我们目前没有直接的添加成员API，我们暂时只更新本地状态
-      // 在实际应用中，这里应该调用类似 inviteMember 的函数
-      console.log('添加成员到数据库:', newMember);
+      // 调用API添加成员到数据库
+      const newMember = await organizationService.inviteMember(
+        currentOrganization.id, 
+        inviteFormData.email, 
+        inviteFormData.role
+      );
       
-      // 为了确保数据同步，我们刷新成员列表
-      // refetchMembers();
+      // 更新本地状态
+      setMembers(prevMembers => [...prevMembers, newMember]);
+      
+      // 关闭表单
+      setShowAddMemberForm(false);
+      
+      // 重置表单数据
+      setInviteFormData({
+        email: '',
+        role: 'MEMBER',
+        name: '',
+      });
       
       alert('成员添加成功！');
-    } catch (error) {
-      // 如果API调用失败，从本地状态中移除成员
-      setMembers(prevMembers => prevMembers.filter(member => member.id !== newMember.id));
+    } catch (error: any) {
       console.error('添加成员失败:', error);
-      alert('添加失败，请重试');
+      alert(error.response?.data?.message || '添加失败，请重试');
     }
   };
 
@@ -238,64 +252,85 @@ export const Organizations: React.FC = () => {
       // 先更新本地状态，提供即时反馈
       setMembers(prevMembers => prevMembers.filter(member => member.id !== memberId));
       
-      // 然后调用API移除成员
-      removeMember(
-        { orgId: currentOrganization.id, memberId },
-        {
-          onSuccess: () => {
-            console.log('成员移除成功:', memberId);
-            // 刷新成员列表以确保同步
-            refetchMembers();
-          },
-          onError: (error) => {
-            // 如果API调用失败，恢复本地状态
-            refetchMembers(); // 重新获取最新的成员列表
-            console.error('移除成员失败:', error);
-            alert('移除失败，请重试');
-          }
-        }
-      );
+      try {
+        // 调用API移除成员
+        await organizationService.removeMember(currentOrganization.id, memberId);
+        console.log('成员移除成功:', memberId);
+        // 刷新成员列表以确保同步
+        refetchMembers();
+      } catch (error: any) {
+        // 如果API调用失败，恢复本地状态
+        refetchMembers(); // 重新获取最新的成员列表
+        console.error('移除成员失败:', error);
+        alert(error.response?.data?.message || '移除失败，请重试');
+      }
     }
   };
 
   const handleSaveSettings = async () => {
+    if (!currentOrganization) return;
+    
     try {
-      // TODO: 实际API调用
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // 更新设置
-      setOrganizations(prev => prev.map(org => ({
-        ...org,
+      // 调用API更新组织设置
+      await organizationService.update(currentOrganization.id, {
         settings: {
-          ...org.settings,
-          // 这里可以从表单获取值，目前使用默认值
-        },
-      })));
+          defaultCurrency: orgFormData.defaultCurrency,
+          defaultTimezone: orgFormData.defaultTimezone,
+          fiscalYearStart: orgFormData.fiscalYearStart,
+        }
+      });
+      
+      // 更新本地状态
+      setOrganizations(prev => prev.map(org => 
+        org.id === currentOrganization.id ? {
+          ...org,
+          settings: {
+            defaultCurrency: orgFormData.defaultCurrency,
+            defaultTimezone: orgFormData.defaultTimezone,
+            fiscalYearStart: orgFormData.fiscalYearStart,
+          }
+        } : org
+      ));
       
       alert('设置保存成功！');
-    } catch (error) {
+    } catch (error: any) {
       console.error('保存设置失败:', error);
-      alert('保存失败，请重试');
+      alert(error.response?.data?.message || '保存失败，请重试');
     }
   };
 
   const handleUpdateMemberRole = async (memberId: string, newRole: string) => {
     if (!currentOrganization) return;
     
-    updateMemberRole(
-      { orgId: currentOrganization.id, memberId, role: newRole },
-      {
-        onSuccess: () => {
-          console.log('成员角色更新成功:', memberId);
-          // 刷新成员列表
-          refetchMembers();
-        },
-        onError: (error) => {
-          console.error('更新成员角色失败:', error);
-          alert('更新失败，请重试');
-        }
-      }
+    // 先更新本地状态，提供即时反馈
+    setMembers(prevMembers => 
+      prevMembers.map(member => 
+        member.id === memberId ? { ...member, role: newRole } : member
+      )
     );
+    
+    try {
+      // 调用API更新成员角色
+      const updatedMember = await organizationService.updateMemberRole(
+        currentOrganization.id, 
+        memberId, 
+        newRole
+      );
+      
+      // 更新本地状态
+      setMembers(prevMembers => 
+        prevMembers.map(member => 
+          member.id === memberId ? updatedMember : member
+        )
+      );
+      
+      console.log('成员角色更新成功:', memberId);
+    } catch (error: any) {
+      // 如果API调用失败，恢复本地状态
+      refetchMembers(); // 重新获取最新的成员列表
+      console.error('更新成员角色失败:', error);
+      alert(error.response?.data?.message || '更新失败，请重试');
+    }
   };
 
   const handleCancelSettings = () => {
@@ -465,7 +500,7 @@ export const Organizations: React.FC = () => {
                         <div className="flex-shrink-0 h-10 w-10">
                           <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
                             <span className="text-sm font-medium text-gray-700">
-                              {member.user.name.charAt(0)}
+                              {member.user.name.charAt(0).toUpperCase()}
                             </span>
                           </div>
                         </div>
@@ -538,7 +573,8 @@ export const Organizations: React.FC = () => {
               </label>
               <input
                 type="text"
-                value={currentOrg.settings.fiscalYearStart}
+                value={orgFormData.fiscalYearStart}
+                onChange={(e) => setOrgFormData({ ...orgFormData, fiscalYearStart: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                 placeholder="MM-DD"
               />
@@ -715,10 +751,38 @@ export const Organizations: React.FC = () => {
                 
                 <div className="flex space-x-3 pt-4">
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       if (editingMember) {
-                        handleUpdateMemberRole(editingMember.id, editingMember.role);
-                        setShowEditMemberForm(false);
+                        try {
+                          // 先更新本地状态，提供即时反馈
+                          setMembers(prevMembers => 
+                            prevMembers.map(member => 
+                              member.id === editingMember.id ? { ...editingMember } : member
+                            )
+                          );
+                          
+                          // 调用API更新成员角色
+                          const updatedMember = await organizationService.updateMemberRole(
+                            currentOrganization!.id, 
+                            editingMember.id, 
+                            editingMember.role
+                          );
+                          
+                          // 更新本地状态
+                          setMembers(prevMembers => 
+                            prevMembers.map(member => 
+                              member.id === editingMember.id ? updatedMember : member
+                            )
+                          );
+                          
+                          setShowEditMemberForm(false);
+                          console.log('成员角色更新成功:', editingMember.id);
+                        } catch (error: any) {
+                          // 如果API调用失败，恢复本地状态
+                          refetchMembers(); // 重新获取最新的成员列表
+                          console.error('更新成员角色失败:', error);
+                          alert(error.response?.data?.message || '更新失败，请重试');
+                        }
                       }
                     }}
                     className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
