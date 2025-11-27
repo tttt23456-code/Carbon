@@ -36,7 +36,10 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     try {
-      const payload = await this.jwtService.verifyAsync(token);
+      // 使用JWT_SECRET验证令牌
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: process.env.JWT_SECRET,
+      });
       
       // 从数据库获取用户信息
       const user = await this.prisma.user.findUnique({
