@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# 碳排放计算系统启动脚本
+# 企业碳计量数字化平台启动脚本
 
 set -e
 
-echo "🚀 启动碳排放计算系统..."
+echo "🚀 启动企业碳计量数字化平台..."
 
 # 检查 Docker 是否安装
 if ! command -v docker &> /dev/null; then
@@ -49,11 +49,9 @@ case $MODE in
         echo "📝 服务访问地址："
         echo "   数据库: postgresql://carbon_user:carbon_password@localhost:5432/carbon_db"
         echo "   Redis: redis://localhost:6379"
-        echo "   pgAdmin: http://localhost:5050 (admin@carbon.dev / admin123)"
-        echo ""
-        echo "🚀 启动开发服务器："
-        echo "   后端: cd apps/api && pnpm dev"
-        echo "   前端: cd apps/web && pnpm dev"
+        echo "   后端 API: http://localhost:3001"
+        echo "   前端应用: http://localhost:3000"
+        echo "   API 文档: http://localhost:3001/api/docs"
         ;;
         
     "prod")
@@ -65,36 +63,20 @@ case $MODE in
         
         echo "✅ 生产环境启动完成！"
         echo ""
-        echo "🌐 服务访问地址："
-        echo "   前端: http://localhost:3000"
-        echo "   后端 API: http://localhost:3001"
-        echo "   API 文档: http://localhost:3001/api/docs"
-        echo "   pgAdmin: http://localhost:5050 (admin@carbon.local / admin123)"
-        ;;
-        
-    "stop")
-        echo "🛑 停止服务..."
-        docker-compose -f infra/docker/docker-compose.yml down
-        docker-compose -f infra/docker/docker-compose.dev.yml down
-        echo "✅ 服务已停止"
-        ;;
-        
-    "clean")
-        echo "🧹 清理 Docker 资源..."
-        docker-compose -f infra/docker/docker-compose.yml down -v
-        docker-compose -f infra/docker/docker-compose.dev.yml down -v
-        docker system prune -f
-        echo "✅ 清理完成"
+        echo "📝 服务访问地址："
+        echo "   前端应用: http://localhost:80"
+        echo "   后端 API: http://localhost:80/api"
+        echo "   API 文档: http://localhost:80/api/docs"
         ;;
         
     *)
-        echo "Usage: $0 {dev|prod|stop|clean}"
-        echo ""
-        echo "Commands:"
-        echo "  dev   - 启动开发环境（仅数据库等基础服务）"
-        echo "  prod  - 启动生产环境（完整系统）"
-        echo "  stop  - 停止所有服务"
-        echo "  clean - 清理所有 Docker 资源"
+        echo "使用方法: ./start.sh [dev|prod]"
         exit 1
         ;;
 esac
+
+echo ""
+echo "💡 提示："
+echo "   - 查看日志: docker-compose logs -f"
+echo "   - 停止服务: docker-compose down"
+echo "   - 重启服务: docker-compose restart"

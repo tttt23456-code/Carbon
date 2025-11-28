@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * 系统功能验证脚本
- * 验证碳排放计算系统的核心功能
+ * 验证企业碳计量数字化平台的核心功能
  */
 
 const { execSync } = require('child_process');

@@ -1,7 +1,7 @@
 {
-  "name": "carbon-emission-calculator",
+  "name": "enterprise-carbon-digital-platform",
   "version": "1.0.0",
-  "description": "Carbon Emission Calculator System following GHG Protocol",
+  "description": "Enterprise Carbon Digital Platform following GHG Protocol",
   "private": true,
   "workspaces": [
     "apps/*",

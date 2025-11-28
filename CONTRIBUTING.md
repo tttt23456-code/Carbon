@@ -1,6 +1,6 @@
 # 贡献指南
 
-感谢您对碳排放计算系统的关注！本指南将帮助您了解如何为项目做出贡献。
+感谢您对企业碳计量数字化平台的关注！本指南将帮助您了解如何为项目做出贡献。
 
 ## 🚀 快速开始
 
@@ -82,189 +82,73 @@ git checkout -b feature/add-scope3-transport-calculator
 - `chore`: 其他不修改源码的变更
 - `revert`: 回滚之前的提交
 
-#### 示例
+#### 示例提交信息
 
-```bash
-# 新功能
-git commit -m "feat(calculations): add waste treatment calculator"
+```
+feat(calculator): 添加废弃物处理计算器
 
-# Bug 修复
-git commit -m "fix(auth): resolve token refresh issue"
+- 支持填埋、焚烧、回收三种处理方式
+- 添加甲烷回收率参数
+- 实现 EPA 排放因子计算逻辑
 
-# 文档更新
-git commit -m "docs(api): update calculation endpoint documentation"
-
-# 重构
-git commit -m "refactor(units): extract unit conversion to separate service"
+Closes #123
 ```
 
-### Pull Request 流程
+### 代码审查
 
-1. **确保功能完整**：
-   - 代码实现完成
-   - 添加必要的测试
-   - 更新相关文档
-   - 通过所有检查
+所有 Pull Request 都需要经过代码审查：
 
-2. **推送分支**：
-```bash
-git push origin feature/your-feature-name
-```
+1. **自检清单**
+   - [ ] 代码符合项目规范
+   - [ ] 添加了必要的测试
+   - [ ] 更新了相关文档
+   - [ ] 通过了所有 CI 检查
 
-3. **创建 Pull Request**：
-   - 使用清晰的标题和描述
-   - 关联相关的 Issue
-   - 填写 PR 模板
+2. **审查要点**
+   - 代码质量和可读性
+   - 功能实现的正确性
+   - 性能和安全性考虑
+   - 测试覆盖率
 
-4. **代码审查**：
-   - 响应审查意见
-   - 修改代码并推送更新
-   - 解决所有讨论
+## 🧪 测试规范
 
-5. **合并**：
-   - 通过所有检查后将被合并
-   - 删除功能分支
+### 测试类型
 
-## 🧪 测试
+- **单元测试** - 测试单个函数或类
+- **集成测试** - 测试模块间交互
+- **端到端测试** - 测试完整用户流程
 
-### 运行测试
+### 命令行工具
 
 ```bash
 # 运行所有测试
 pnpm test
 
-# 运行特定模块测试
-pnpm --filter api test
-pnpm --filter web test
+# 运行特定测试
+pnpm test:api
+pnpm test:web
 
 # 测试覆盖率
 pnpm test:cov
-
-# E2E 测试
-pnpm test:e2e
 
 # 监视模式
 pnpm test:watch
 ```
 
-### 测试要求
+### 测试最佳实践
 
-- **单元测试覆盖率** >= 80%
-- **关键功能必须有测试**（计算器、认证、数据库操作）
-- **新功能必须包含测试**
-- **E2E 测试覆盖主要用户流程**
+- **命名规范**: `功能名.test.ts` 或 `功能名.spec.ts`
+- **描述清晰**: 使用 `describe` 和 `it` 准确描述测试场景
+- **独立性**: 每个测试应该独立运行
+- **断言明确**: 使用明确的期望值
 
-### 测试示例
+## 📝 文档规范
 
-```typescript
-// 单元测试示例
-describe('ElectricityCalculator', () => {
-  let calculator: ElectricityCalculator;
+### 注释风格
 
-  beforeEach(() => {
-    calculator = new ElectricityCalculator(unitConverter);
-  });
-
-  it('should calculate electricity emissions correctly', async () => {
-    const input = {
-      activityType: 'electricity',
-      amount: 1000,
-      unit: 'kWh',
-      metadata: {},
-    };
-
-    const factor = {
-      factorValue: 0.581,
-      factorUnit: 'kg CO2e/kWh',
-      // ...
-    };
-
-    const result = await calculator.calculate(input, factor);
-    expect(result.tCO2e).toBeCloseTo(0.581);
-  });
-});
-```
-
-## 🎨 代码规范
-
-### TypeScript 规范
-
-- 使用 **严格模式**（`strict: true`）
-- **明确类型定义**，避免 `any`
-- 使用 **接口** 定义复杂类型
-- **导出类型** 供其他模块使用
-
-```typescript
-// 好的示例
-interface CalculationInput {
-  activityType: string;
-  amount: number;
-  unit: string;
-  metadata?: Record<string, unknown>;
-}
-
-export class Calculator {
-  async calculate(input: CalculationInput): Promise<CalculationResult> {
-    // 实现
-  }
-}
-
-// 避免
-export class Calculator {
-  async calculate(input: any): Promise<any> {
-    // 避免使用 any
-  }
-}
-```
-
-### 命名规范
-
-- **文件名**：kebab-case (`calculation.service.ts`)
-- **类名**：PascalCase (`CalculationService`)
-- **函数/变量**：camelCase (`calculateEmissions`)
-- **常量**：UPPER_SNAKE_CASE (`DEFAULT_TIMEOUT`)
-- **接口**：PascalCase，不使用 `I` 前缀 (`Calculator`)
-
-### 目录结构
-
-```
-apps/api/src/
-├── module-name/                 # 模块目录
-│   ├── dto/                     # 数据传输对象
-│   ├── entities/                # 实体定义
-│   ├── interfaces/              # 接口定义
-│   ├── services/                # 业务逻辑
-│   ├── controllers/             # 控制器
-│   ├── module.ts                # 模块定义
-│   └── __tests__/               # 测试文件
-│       ├── service.spec.ts
-│       └── controller.spec.ts
-```
-
-## 📚 文档
-
-### API 文档
-
-- 使用 **Swagger/OpenAPI** 注解
-- 提供**请求/响应示例**
-- 说明**错误码和错误信息**
-
-```typescript
-@ApiOperation({ summary: '计算碳排放' })
-@ApiResponse({ 
-  status: 200, 
-  description: '计算成功',
-  type: CalculationResultDto 
-})
-@ApiResponse({ 
-  status: 400, 
-  description: '输入参数错误' 
-})
-@Post('calculate')
-async calculate(@Body() input: CalculationInputDto) {
-  // 实现
-}
-```
+- **JSDoc** 用于公共 API
+- **行内注释** 解释复杂逻辑
+- **TODO 注释** 标记待办事项
 
 ### 代码注释
 
@@ -272,7 +156,7 @@ async calculate(@Body() input: CalculationInputDto) {
 - **复杂逻辑**添加行内注释
 - **公式和算法**提供参考链接
 
-```typescript
+```
 /**
  * 电力消耗碳排放计算器
  * 
@@ -339,11 +223,45 @@ export class ElectricityCalculator extends BaseCalculator {
 - **commit-msg**: 验证提交信息格式
 - **pre-push**: 运行测试
 
+## 🚀 发布流程
+
+### 版本号规范
+
+遵循 [语义化版本](https://semver.org/lang/zh-CN/)：
+
+- **MAJOR** 不兼容的重大更新
+- **MINOR** 向后兼容的功能新增
+- **PATCH** 向后兼容的问题修正
+
+### 发布步骤
+
+1. **更新版本号**
+   ```bash
+   npm version patch  # 修订版本
+   npm version minor  # 次要版本
+   npm version major  # 主要版本
+   ```
+
+2. **生成变更日志**
+   ```bash
+   npm run changelog
+   ```
+
+3. **推送更改**
+   ```bash
+   git push origin main --tags
+   ```
+
+4. **发布到 NPM**
+   ```bash
+   npm publish
+   ```
+
 ## 🐛 报告 Bug
 
 ### Bug 报告模板
 
-```markdown
+```
 ## Bug 描述
 简要描述遇到的问题
 

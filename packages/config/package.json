@@ -1,7 +1,7 @@
 {
-  "name": "@carbon/config",
+  "name": "@enterprise-carbon/config",
   "version": "1.0.0",
-  "description": "Shared configuration for Carbon Emission Calculator",
+  "description": "Shared configuration for Enterprise Carbon Digital Platform",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {

@@ -10,7 +10,7 @@ export const Home: React.FC = () => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <h1 className="text-xl font-semibold text-gray-900">
-                碳排放计算系统
+                企业碳计量数字化平台
               </h1>
             </div>
             <nav className="flex space-x-4">
@@ -32,7 +32,7 @@ export const Home: React.FC = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
             <div className="text-center">
               <h1 className="text-4xl font-bold text-white sm:text-5xl md:text-6xl">
-                企业级碳排放计算平台
+                企业碳计量数字化平台
               </h1>
               <p className="mt-6 max-w-2xl mx-auto text-xl text-green-100">
                 遵循 GHG Protocol 标准，支持 Scope 1/2/3 全范围碳核算，助力企业实现碳中和目标
@@ -65,43 +65,43 @@ export const Home: React.FC = () => {
               {/* Feature 1 */}
               <div className="text-center">
                 <div className="flex justify-center">
-                  <div className="bg-green-100 rounded-lg p-3">
-                    <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="flex items-center justify-center h-12 w-12 rounded-md bg-green-500 text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                   </div>
                 </div>
                 <h3 className="mt-4 text-lg font-medium text-gray-900">
-                  智能计算引擎
+                  全范围碳核算
                 </h3>
                 <p className="mt-2 text-gray-600">
-                  支持电力、燃料、交通、废弃物等多种排放源的精确计算
+                  支持 GHG Protocol Scope 1/2/3 全范围排放计算，满足企业碳中和管理需求
                 </p>
               </div>
 
               {/* Feature 2 */}
               <div className="text-center">
                 <div className="flex justify-center">
-                  <div className="bg-green-100 rounded-lg p-3">
-                    <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="flex items-center justify-center h-12 w-12 rounded-md bg-green-500 text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
                   </div>
                 </div>
                 <h3 className="mt-4 text-lg font-medium text-gray-900">
-                  多租户管理
+                  多租户架构
                 </h3>
                 <p className="mt-2 text-gray-600">
-                  支持多组织、多项目管理，灵活的权限控制体系
+                  组织级数据隔离，支持成员权限管理 (RBAC)，满足集团化企业管理需求
                 </p>
               </div>
 
               {/* Feature 3 */}
               <div className="text-center">
                 <div className="flex justify-center">
-                  <div className="bg-green-100 rounded-lg p-3">
-                    <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                  <div className="flex items-center justify-center h-12 w-12 rounded-md bg-green-500 text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                   </div>
                 </div>
@@ -141,7 +141,7 @@ export const Home: React.FC = () => {
       <footer className="bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center text-gray-600">
-            <p>&copy; 2024 碳排放计算系统. 保留所有权利.</p>
+            <p>&copy; 2024 企业碳计量数字化平台. 保留所有权利.</p>
             <p className="mt-2 text-sm">
               遵循 MIT 开源协议 | 基于 GHG Protocol 标准构建
             </p>

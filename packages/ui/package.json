@@ -1,7 +1,7 @@
 {
-  "name": "@carbon/ui",
+  "name": "@enterprise-carbon/ui",
   "version": "1.0.0",
-  "description": "Shared UI Components for Carbon Emission Calculator",
+  "description": "Shared UI Components for Enterprise Carbon Digital Platform",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {

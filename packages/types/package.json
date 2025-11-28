@@ -1,7 +1,7 @@
 {
-  "name": "@carbon/types",
+  "name": "@enterprise-carbon/types",
   "version": "1.0.0",
-  "description": "Shared TypeScript types for Carbon Emission Calculator",
+  "description": "Shared TypeScript types for Enterprise Carbon Digital Platform",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {

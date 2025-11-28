@@ -1,4 +1,4 @@
-# 碳排放计算系统 (Carbon Emission Calculator)
+# 企业碳计量数字化平台 (Carbon Emission Calculator)
 
 遵循 GHG Protocol 的企业级碳排放计算平台，支持 Scope 1/2/3 全范围碳核算。
 

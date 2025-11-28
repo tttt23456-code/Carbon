@@ -1,7 +1,7 @@
 {
-  "name": "@carbon/api",
+  "name": "@enterprise-carbon/api",
   "version": "1.0.0",
-  "description": "Carbon Emission Calculator API",
+  "description": "Enterprise Carbon Digital Platform API",
   "main": "dist/main.js",
   "scripts": {
     "prebuild": "rimraf dist",
