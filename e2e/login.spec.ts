@@ -41,10 +41,10 @@ test.describe('Login Flow', () => {
     await page.waitForURL('/dashboard/activity-records');
     await expect(page.locator('h1')).toContainText('活动数据管理');
 
-    // 测试导航到计算页面
-    await page.click('text=碳排放计算');
+    // 测试导航到计量页面
+    await page.click('text=碳排放计量');
     await page.waitForURL('/dashboard/calculations');
-    await expect(page.locator('h1')).toContainText('碳排放计算');
+    await expect(page.locator('h1')).toContainText('碳排放计量');
 
     // 测试导航到报表页面
     await page.click('text=报表分析');

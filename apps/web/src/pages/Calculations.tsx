@@ -166,7 +166,7 @@ export const Calculations: React.FC = () => {
       ];
       setRecentResults(mockResults);
     } catch (error) {
-      console.error('加载计算结果失败:', error);
+      console.error('加载计量结果失败:', error);
     }
   };
 
@@ -178,7 +178,7 @@ export const Calculations: React.FC = () => {
       // TODO: 实际API调用
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // 模拟计算结果
+      // 模拟计量结果
       const factor = emissionFactors.find(f => f.activityType === formData.activityType);
       const emissions = factor ? (formData.amount * factor.factorValue / 1000) : 0;
       
@@ -245,7 +245,7 @@ export const Calculations: React.FC = () => {
       // TODO: 实际API调用
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // 模拟批量计算结果
+      // 模拟批量计量结果
       const batchResults: CalculationResult[] = [
         {
           id: Date.now().toString(),
@@ -288,16 +288,16 @@ export const Calculations: React.FC = () => {
   };
 
   const handleDeleteResult = async (resultId: string) => {
-    if (window.confirm('确定要删除这个计算结果吗？')) {
+    if (window.confirm('确定要删除这个计量结果吗？')) {
       try {
         // TODO: 实际API调用
         await new Promise(resolve => setTimeout(resolve, 500));
         
         // 从列表中移除结果
         setRecentResults(recentResults.filter(result => result.id !== resultId));
-        console.log('删除计算结果:', resultId);
+        console.log('删除计量结果:', resultId);
       } catch (error) {
-        console.error('删除计算结果失败:', error);
+        console.error('删除计量结果失败:', error);
         alert('删除失败，请重试');
       }
     }
@@ -307,8 +307,8 @@ export const Calculations: React.FC = () => {
     <div className="space-y-6">
       {/* 页面标题 */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">碳排放计算</h1>
-        <p className="mt-1 text-gray-600">计算各类活动的温室气体排放量</p>
+        <h1 className="text-2xl font-bold text-gray-900">碳排放计量</h1>
+        <p className="mt-1 text-gray-600">计量各类活动的温室气体排放量</p>
       </div>
 
       {/* 标签页 */}
@@ -342,7 +342,7 @@ export const Calculations: React.FC = () => {
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
-            计算结果
+            计量结果
           </button>
         </nav>
       </div>
@@ -481,7 +481,7 @@ export const Calculations: React.FC = () => {
 
           {/* 计算结果 */}
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">计算结果</h2>
+            <h2 className="text-lg font-medium text-gray-900 mb-4">计量结果</h2>
             {calculationResult ? (
               <div className="space-y-4">
                 <div className="bg-green-50 rounded-lg p-4">
@@ -588,7 +588,7 @@ export const Calculations: React.FC = () => {
       {activeTab === 'results' && (
         <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-medium text-gray-900">计算结果历史</h2>
+            <h2 className="text-lg font-medium text-gray-900">计量结果历史</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -744,7 +744,7 @@ export const Calculations: React.FC = () => {
           <div className="relative top-20 mx-auto p-5 border w-[600px] shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">计算结果详情</h3>
+                <h3 className="text-lg font-medium text-gray-900">计量结果详情</h3>
                 <button
                   onClick={() => {
                     setShowDetailsDialog(false);

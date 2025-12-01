@@ -9,7 +9,7 @@ import {
 import { UnitConverterRegistry } from '../units/unit-converter.service';
 
 /**
- * 货运碳排放计算器 (Scope 3)
+ * 货运碳排放计量器 (Scope 3)
  * 支持公路、铁路、海运、空运等运输方式
  */
 @Injectable()

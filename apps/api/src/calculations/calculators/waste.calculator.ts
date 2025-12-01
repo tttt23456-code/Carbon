@@ -9,7 +9,7 @@ import {
 import { UnitConverterRegistry } from '../units/unit-converter.service';
 
 /**
- * 废弃物处理碳排放计算器 (Scope 3)
+ * 废弃物处理碳排放计量器 (Scope 3)
  * 支持不同废弃物类型和处理方式的排放计算
  */
 @Injectable()

@@ -9,7 +9,7 @@ import {
 import { UnitConverterRegistry } from '../units/unit-converter.service';
 
 /**
- * 燃料燃烧碳排放计算器 (Scope 1)
+ * 燃料燃烧碳排放计量器 (Scope 1)
  * 支持各种燃料类型的燃烧排放计算
  */
 @Injectable()

@@ -42,7 +42,7 @@ export class CalculationController {
   @Post('calculate')
   @Roles('ADMIN', 'MANAGER', 'MEMBER')
   @ApiOperation({ 
-    summary: '单次碳排放计算',
+    summary: '单次碳排放计量',
     description: '基于活动数据和排放因子计算单次碳排放量'
   })
   @ApiBody({ type: SingleCalculationDto })
@@ -67,7 +67,7 @@ export class CalculationController {
   @Post('batch')
   @Roles('ADMIN', 'MANAGER', 'MEMBER')
   @ApiOperation({ 
-    summary: '批量碳排放计算',
+    summary: '批量碳排放计量',
     description: '批量计算多个活动记录的碳排放量'
   })
   @ApiBody({ type: BatchCalculationDto })
@@ -91,7 +91,7 @@ export class CalculationController {
   @Patch('recalculate/:activityRecordId')
   @Roles('ADMIN', 'MANAGER', 'MEMBER')
   @ApiOperation({ 
-    summary: '重新计算指定活动记录',
+    summary: '重新计量指定活动记录',
     description: '使用新的排放因子重新计算指定活动记录的碳排放量'
   })
   @ApiParam({ 
@@ -141,8 +141,8 @@ export class CalculationController {
   @Get('statistics')
   @Roles('ADMIN', 'MANAGER')
   @ApiOperation({ 
-    summary: '获取计算器统计信息',
-    description: '获取计算器的统计信息和配置状态'
+    summary: '获取计量器统计信息',
+    description: '获取计量器的统计信息和配置状态'
   })
   @ApiResponse({ 
     status: 200, 
@@ -156,8 +156,8 @@ export class CalculationController {
   @Get('validate')
   @Roles('ADMIN')
   @ApiOperation({ 
-    summary: '验证计算器配置',
-    description: '验证所有计算器的配置是否正确'
+    summary: '验证计量器配置',
+    description: '验证所有计量器的配置是否正确'
   })
   @ApiResponse({ 
     status: 200, 

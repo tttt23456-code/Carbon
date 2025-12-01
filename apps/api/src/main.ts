@@ -46,7 +46,7 @@ async function bootstrap() {
   // Swagger文档配置
   const config = new DocumentBuilder()
     .setTitle('Carbon Emission Calculator API')
-    .setDescription('遵循GHG Protocol的碳排放计算平台API文档')
+    .setDescription('遵循GHG Protocol的碳排放计量平台API文档')
     .setVersion('1.0')
     .addTag('auth', '认证与授权')
     .addTag('organizations', '组织管理')
@@ -54,7 +54,7 @@ async function bootstrap() {
     .addTag('projects', '项目管理')
     .addTag('activity-records', '活动数据')
     .addTag('emission-factors', '排放因子')
-    .addTag('calculations', '碳排放计算')
+    .addTag('calculations', '碳排放计量')
     .addTag('reports', '报表与导出')
     .addTag('audit-logs', '审计日志')
     .addBearerAuth(

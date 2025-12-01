@@ -246,7 +246,7 @@ async function validateSystem() {
     log('📋 项目特性:', 'cyan');
     log('   ✓ 完整的Monorepo架构', 'green');
     log('   ✓ 前后端分离设计', 'green');
-    log('   ✓ 5种专业碳排放计算器', 'green');
+    log('   ✓ 5种专业碳排放计量器', 'green');
     log('   ✓ 多租户组织管理', 'green');
     log('   ✓ 用户认证和权限控制', 'green');
     log('   ✓ 响应式Web界面', 'green');

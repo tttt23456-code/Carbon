@@ -39,7 +39,7 @@ export interface EmissionFactor {
 }
 
 /**
- * 计算结果明细
+ * 计量结果明细
  */
 export interface CalculationBreakdown {
   originalAmount: number;
@@ -59,7 +59,7 @@ export interface CalculationBreakdown {
 }
 
 /**
- * 计算结果接口
+ * 计量结果接口
  */
 export interface CalculationResult {
   tCO2e: number;
@@ -84,7 +84,7 @@ export interface Calculator {
   validate(input: CalculationInput): Promise<NormalizedInput>;
 
   /**
-   * 执行碳排放计算
+   * 执行碳排放计量
    */
   calculate(input: NormalizedInput, factor: EmissionFactor): Promise<CalculationResult>;
 }

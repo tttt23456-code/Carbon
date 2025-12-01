@@ -9,7 +9,7 @@ import {
 import { UnitConverterRegistry } from '../units/unit-converter.service';
 
 /**
- * 电力消耗碳排放计算器 (Scope 2)
+ * 电力消耗碳排放计量器 (Scope 2)
  * 支持地点法和市场法计算
  */
 @Injectable()

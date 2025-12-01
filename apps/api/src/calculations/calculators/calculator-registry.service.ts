@@ -8,8 +8,8 @@ import { WasteCalculator } from './waste.calculator';
 import { BusinessTravelCalculator } from './business-travel.calculator';
 
 /**
- * 计算器注册表
- * 管理所有可用的计算器并提供统一的访问接口
+ * 计量器注册表
+ * 管理所有可用的计量器并提供统一的访问接口
  */
 @Injectable()
 export class CalculatorRegistry {
@@ -28,7 +28,7 @@ export class CalculatorRegistry {
   }
 
   /**
-   * 注册所有计算器
+   * 注册所有计量器
    */
   private registerCalculators() {
     this.registerCalculator(this.electricityCalculator);
@@ -38,27 +38,27 @@ export class CalculatorRegistry {
     this.registerCalculator(this.wasteCalculator);
     this.registerCalculator(this.businessTravelCalculator);
 
-    this.logger.log(`已注册 ${this.calculators.size} 个计算器`);
+    this.logger.log(`已注册 ${this.calculators.size} 个计量器`);
   }
 
   /**
-   * 注册单个计算器
+   * 注册单个计量器
    */
   registerCalculator(calculator: Calculator) {
     const supportedTypes = calculator.getSupportedActivityTypes();
     
     for (const activityType of supportedTypes) {
       if (this.calculators.has(activityType)) {
-        this.logger.warn(`活动类型 ${activityType} 的计算器被覆盖`);
+        this.logger.warn(`活动类型 ${activityType} 的计量器被覆盖`);
       }
       this.calculators.set(activityType, calculator);
     }
 
-    this.logger.debug(`注册计算器，支持活动类型: ${supportedTypes.join(', ')}`);
+    this.logger.debug(`注册计量器，支持活动类型: ${supportedTypes.join(', ')}`);
   }
 
   /**
-   * 获取指定活动类型的计算器
+   * 获取指定活动类型的计量器
    */
   getCalculator(activityType: string): Calculator | null {
     return this.calculators.get(activityType) || null;
@@ -120,7 +120,7 @@ export class CalculatorRegistry {
   }
 
   /**
-   * 获取计算器统计信息
+   * 获取计量器统计信息
    */
   getStatistics() {
     const activityTypes = this.getSupportedActivityTypes();
@@ -138,7 +138,7 @@ export class CalculatorRegistry {
   }
 
   /**
-   * 验证计算器配置
+   * 验证计量器配置
    */
   validateConfiguration(): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
@@ -147,7 +147,7 @@ export class CalculatorRegistry {
     const requiredTypes = ['electricity', 'natural_gas', 'diesel', 'gasoline'];
     for (const type of requiredTypes) {
       if (!this.isSupported(type)) {
-        errors.push(`缺少必需活动类型的计算器: ${type}`);
+        errors.push(`缺少必需活动类型的计量器: ${type}`);
       }
     }
 

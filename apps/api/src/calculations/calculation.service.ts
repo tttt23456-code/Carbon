@@ -37,7 +37,7 @@ export interface BatchCalculationResult {
 }
 
 /**
- * 碳排放计算服务
+ * 碳排放计量服务
  * 提供单次和批量计算功能
  */
 @Injectable()
@@ -50,14 +50,14 @@ export class CalculationService {
   ) {}
 
   /**
-   * 单次计算
+   * 单次计量
    */
   async calculate(
     organizationId: string,
     input: CalculationInput,
     factorId?: string,
   ): Promise<CalculationResult> {
-    // 获取计算器
+    // 获取计量器
     const calculator = this.calculatorRegistry.getCalculator(input.activityType);
     if (!calculator) {
       throw new BadRequestException(`不支持的活动类型: ${input.activityType}`);
@@ -78,7 +78,7 @@ export class CalculationService {
   }
 
   /**
-   * 批量计算活动记录
+   * 批量计量活动记录
    */
   async batchCalculate(input: BatchCalculationInput): Promise<BatchCalculationResult> {
     const { organizationId, activityRecordIds, filters } = input;
@@ -174,7 +174,7 @@ export class CalculationService {
         // 更新汇总统计
         this.updateSummary(summary, record, result.tCO2e);
 
-        // 保存计算结果到数据库
+        // 保存计量结果到数据库
         await this.saveCalculationResult(record.id, result, factor);
 
         this.logger.debug(`记录 ${record.id} 计算完成: ${result.tCO2e} tCO2e`);
@@ -205,7 +205,7 @@ export class CalculationService {
   }
 
   /**
-   * 重新计算指定的活动记录
+   * 重新计量指定的活动记录
    */
   async recalculate(
     organizationId: string,
@@ -242,12 +242,12 @@ export class CalculationService {
     // 获取使用的排放因子
     const factor = await this.getEmissionFactor(organizationId, record.activityType, factorId);
 
-    // 删除旧的计算结果
+    // 删除旧的计量结果
     await this.prisma.calculationResult.deleteMany({
       where: { activityRecordId },
     });
 
-    // 保存新的计算结果
+    // 保存新的计量结果
     await this.saveCalculationResult(activityRecordId, result, factor);
 
     this.logger.log(`重新计算记录 ${activityRecordId} 完成: ${result.tCO2e} tCO2e`);
@@ -353,7 +353,7 @@ export class CalculationService {
   }
 
   /**
-   * 保存计算结果
+   * 保存计量结果
    */
   private async saveCalculationResult(
     activityRecordId: string,
@@ -403,14 +403,14 @@ export class CalculationService {
   }
 
   /**
-   * 获取计算器统计信息
+   * 获取计量器统计信息
    */
   getCalculatorStatistics() {
     return this.calculatorRegistry.getStatistics();
   }
 
   /**
-   * 验证计算器配置
+   * 验证计量器配置
    */
   validateCalculators() {
     return this.calculatorRegistry.validateConfiguration();

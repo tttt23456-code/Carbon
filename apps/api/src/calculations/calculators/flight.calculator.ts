@@ -9,7 +9,7 @@ import {
 import { UnitConverterRegistry } from '../units/unit-converter.service';
 
 /**
- * 航班碳排放计算器 (Scope 3)
+ * 航班碳排放计量器 (Scope 3)
  * 支持不同航程和舱位的排放计算
  */
 @Injectable()

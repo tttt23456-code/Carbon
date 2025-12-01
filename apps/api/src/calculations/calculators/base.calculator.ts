@@ -10,7 +10,7 @@ import {
 import { UnitConverterRegistry } from '../units/unit-converter.service';
 
 /**
- * 基础计算器抽象类
+ * 基础计量器抽象类
  */
 @Injectable()
 export abstract class BaseCalculator implements Calculator {

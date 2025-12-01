@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Carbon Calculation Flow', () => {
+test.describe('Carbon Measurement Flow', () => {
   test.beforeEach(async ({ page }) => {
     // 登录
     await page.goto('/');
@@ -10,8 +10,8 @@ test.describe('Carbon Calculation Flow', () => {
   });
 
   test('should perform single calculation', async ({ page }) => {
-    // 导航到计算页面
-    await page.click('text=碳排放计算');
+    // 导航到计量页面
+    await page.click('text=碳排放计量');
     await page.waitForURL('/dashboard/calculations');
 
     // 选择活动类型
@@ -24,8 +24,8 @@ test.describe('Carbon Calculation Flow', () => {
     // 点击计算按钮
     await page.click('button:has-text("开始计算")');
 
-    // 等待计算结果
-    await expect(page.locator('text=计算完成')).toBeVisible();
+    // 等待计量结果
+    await expect(page.locator('text=计量完成')).toBeVisible();
     await expect(page.locator('text=tCO₂e')).toBeVisible();
   });
 

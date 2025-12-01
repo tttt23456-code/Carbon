@@ -57,7 +57,7 @@ export const Home: React.FC = () => {
                 核心功能
               </h2>
               <p className="mt-4 text-lg text-gray-600">
-                全面的碳排放计算和管理解决方案
+                全面的碳排放计量和管理解决方案
               </p>
             </div>
 

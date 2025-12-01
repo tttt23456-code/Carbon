@@ -85,11 +85,11 @@ git checkout -b feature/add-scope3-transport-calculator
 #### 示例提交信息
 
 ```
-feat(calculator): 添加废弃物处理计算器
+feat(calculator): 添加废弃物处理计量器
 
 - 支持填埋、焚烧、回收三种处理方式
 - 添加甲烷回收率参数
-- 实现 EPA 排放因子计算逻辑
+- 实现 EPA 排放因子计量逻辑
 
 Closes #123
 ```
@@ -158,9 +158,9 @@ pnpm test:watch
 
 ```
 /**
- * 电力消耗碳排放计算器
+ * 电力消耗碳排放计量器
  * 
- * 支持地点法和市场法两种计算方式：
+ * 支持地点法和市场法两种计量方式：
  * - 地点法：使用电网平均排放因子
  * - 市场法：考虑购电协议和可再生能源证书
  * 
@@ -168,13 +168,13 @@ pnpm test:watch
  */
 export class ElectricityCalculator extends BaseCalculator {
   /**
-   * 计算电力消耗的碳排放量
+   * 计量电力消耗的碳排放量
    * 
    * 公式：emissions = kWh × factor × (transmission_losses + 1)
    * 
    * @param input 标准化输入数据
    * @param factor 排放因子
-   * @returns 计算结果
+   * @returns 计量结果
    */
   async calculate(input: NormalizedInput, factor: EmissionFactor): Promise<CalculationResult> {
     // 实现
@@ -296,9 +296,9 @@ security@caict-carbon.com
 
 ## 🏗️ 架构指南
 
-### 添加新的计算器
+### 添加新的计量器
 
-1. **创建计算器类**：
+1. **创建计量器类**：
 ```typescript
 // apps/api/src/calculations/calculators/my-calculator.ts
 export class MyCalculator extends BaseCalculator {
@@ -316,7 +316,7 @@ export class MyCalculator extends BaseCalculator {
 }
 ```
 
-2. **注册计算器**：
+2. **注册计量器**：
 ```typescript
 // apps/api/src/calculations/calculators/calculator-registry.service.ts
 constructor(
@@ -464,8 +464,8 @@ return safeUser;
 **Q: 如何添加新的排放因子？**
 A: 参考 `apps/api/prisma/seed.ts` 中的示例，或通过 API 动态添加。
 
-**Q: 如何自定义计算逻辑？**
-A: 继承 `BaseCalculator` 类并实现相关方法，参考现有计算器实现。
+**Q: 如何自定义计量逻辑？**
+A: 继承 `BaseCalculator` 类并实现相关方法，参考现有计量器实现。
 
 **Q: 如何贡献多语言翻译？**
 A: 在 `apps/web/src/locales/` 目录下添加新的语言文件。

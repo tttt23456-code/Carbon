@@ -9,7 +9,7 @@ import {
 import { UnitConverterRegistry } from '../units/unit-converter.service';
 
 /**
- * 商务差旅碳排放计算器 (Scope 3)
+ * 商务差旅碳排放计量器 (Scope 3)
  * 支持员工通勤、商务旅行等差旅相关排放计算
  */
 @Injectable()
